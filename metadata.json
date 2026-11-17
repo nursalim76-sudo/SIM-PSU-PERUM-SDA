@@ -1,0 +1,6 @@
+{
+  "name": "SIM-PSU Sidoarjo",
+  "description": "Sistem Informasi Monitoring Penyerahan Prasarana, Sarana, dan Utilitas Umum Perumahan Kabupaten Sidoarjo (DP2CKTR) sesuai Permendagri No. 15 Tahun 2026.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

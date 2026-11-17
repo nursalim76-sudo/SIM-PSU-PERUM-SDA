@@ -1,0 +1,417 @@
+PRODUCT REQUIREMENT DOCUMENT
+SIM-PSU SIDOARJO
+Sistem Informasi Monitoring Penyerahan Prasarana, Sarana, dan Utilitas Umum Perumahan Terintegrasi
+•	Dokumen: Product Requirement Document (PRD)
+•	Produk: SIM-PSU Sidoarjo (Sistem Informasi Monitoring Penyerahan PSU Perumahan)
+•	Instansi Pemilik: Dinas Perumahan, Permukiman, Cipta Karya dan Tata Ruang (DP2CKTR) Kabupaten Sidoarjo
+•	Versi: 2.0 (Disesuaikan dengan Permendagri No. 15 Tahun 2026 & Format Standar PRD Terlampir)
+•	Tanggal: 17 November 2026
+•	Lingkup: Pengajuan Penyerahan (Sekaligus/Bertahap), Verifikasi Administrasi, Verifikasi Fisik & Geotagging, Defect List & Masa Pemeliharaan, BAPL/BAST, Pencatatan BMD (BPKAD), WebGIS 18 Kecamatan, Jalur Khusus PSU Terlantar, Analytics, Insight, dan Smart Recommendation.
+Ringkasan Eksekutif
+SIM-PSU Sidoarjo adalah aplikasi berbasis web dan mobile-responsive (PWA) untuk mengelola serta memantau penyerahan Prasarana, Sarana, dan Utilitas Umum (PSU) perumahan secara terintegrasi di lingkungan Pemerintah Kabupaten Sidoarjo sesuai Permendagri Nomor 15 Tahun 2026. Sistem ini mengatasi pendataan pengembang yang tersebar antar-OPD, ketidaksinkronan antara dokumen administrasi (siteplan, PBG, pelepasan hak tanah) dengan kondisi fisik di lapangan, lemahnya pengawasan masa pemeliharaan dan perbaikan cacat mutu (defect list), keterlambatan pencatatan Barang Milik Daerah (BMD), serta kesulitan pimpinan daerah memperoleh insight spasial dan aset secara real-time.
+Produk memiliki tiga lapisan utama:
+1.	Transaksi Operasional & Verifikasi: Pengajuan penyerahan (skema sekaligus maupun bertahap), verifikasi administrasi lintas OPD hingga penerbitan BA Administrasi, survei fisik geotagging & defect list, pemantauan masa pemeliharaan, hingga penerbitan BAPL dan BAST Akhir.
+2.	Pengelolaan Aset & Penanganan Khusus: Integrasi pencatatan aset ke dalam Kartu Inventaris Barang (KIB) BMD di BPKAD, serah kelola ke perangkat daerah teknis, serta jalur khusus penanganan PSU terlantar atau pengembang pailit/tidak diketahui.
+3.	Analytics, WebGIS & Insight: Dashboard eksekutif 18 kecamatan, perbandingan luasan siteplan vs aktual, analisis tunggakan penyerahan, early warning system, serta pemanfaatan AI pada tahap lanjut untuk deteksi anomali, forecasting serapan aset PSU, dan penyusunan management brief otomatis.
+Prinsip Produk
+Aplikasi ini tidak boleh hanya menjadi tempat mengunggah dokumen digital. Nilai utamanya adalah mengunci kesesuaian antara kewajiban administrasi, kualitas fisik lapangan, dan legalitas pencatatan aset daerah (BMD), sekaligus mengubah data transaksi menjadi insight strategis bagi pengelola serta pimpinan Kabupaten Sidoarjo dalam mengambil keputusan.
+Daftar Isi
+•	
+1.	Tujuan Aplikasi
+•	
+2.	Untuk Siapa Aplikasi Ini
+•	
+3.	Apa yang Dihasilkan
+•	
+4.	Fitur Utama
+•	
+5.	Data dan Sumber Data
+•	
+6.	Model dan Teknologi AI
+•	
+7.	Desain dan Pengalaman Pengguna
+•	
+8.	Alur Operasional dan Logika Prioritisasi
+•	
+9.	Infrastruktur dan Development
+•	
+10.	Pengembangan Aplikasi
+•	
+11.	Pengujian
+•	
+12.	Keamanan dan Privasi
+•	
+13.	Persiapan Deployment
+•	
+14.	Domain dan Branding
+•	
+15.	Publish dan Launch
+•	
+16.	Monitoring dan Iterasi
+•	Lampiran A. Functional Requirements
+•	Lampiran B. Non-Functional Requirements
+•	Lampiran C. Data Model Awal
+•	Lampiran D. Template Dashboard / Management Brief
+•	Lampiran E. Prompt Lovable / AI App Builder
+1. Tujuan Aplikasi
+1.1 Masalah yang Ingin Diselesaikan
+•	Pengajuan dan pemantauan penyerahan PSU perumahan masih berpotensi tersebar secara manual antar-bidang dan antar-perangkat daerah (DP2CKTR, BPKAD, DPMPTSP, DLHK, PUBMSDA, Kecamatan).
+•	Status progres antara penyerahan administrasi dan penyerahan fisik belum terpantau secara real-time dalam satu sistem terpadu.
+•	Perumahan skala besar yang menyerahkan PSU secara bertahap (per blok/klaster) sulit diawasi akumulasi luasan wajib PSU-nya dibandingkan baseline siteplan yang disahkan.
+•	Hasil pemeriksaan lapangan, temuan cacat mutu (defect list), dan tenggat masa pemeliharaan sebelum BAST Akhir belum terdokumentasi secara spasial (geotagging) dan terhubung dengan histori perumahan.
+•	Proses peralihan aset pasca-BAST ke dalam daftar Barang Milik Daerah (BMD/KIB) di BPKAD masih membutuhkan rekapitulasi ulang secara manual.
+•	Penanganan perumahan lama yang pengembangnya pailit, kabur, atau lalai (penyerahan sepihak/fasilitasi Pemda sesuai Permendagri No. 15 Tahun 2026) membutuhkan alur pelacakan khusus.
+•	Pimpinan daerah (Bupati, Sekda, Kepala Dinas) membutuhkan dashboard ringkas dan peta sebaran untuk memantau rasio penyerahan PSU dan nilai aset daerah yang masuk di seluruh 18 kecamatan Kabupaten Sidoarjo.
+1.2 Nilai yang Diberikan
+Aspek	Nilai	Penjelasan
+Efisiensi	Digitalisasi pengajuan & BA	Mengurangi birokrasi berkas fisik dan mempercepat pembuatan draf Berita Acara (BA Administrasi, BAPL, BAST).
+Transparansi	Satu pintu monitoring PSU	Status kelengkapan berkas, jadwal survei, dan capaian tiap perumahan terlihat jelas oleh pengembang maupun Tim Verifikasi.
+Kontrol	Validasi berjenjang & defect lock	Mencegah penerbitan BAST sebelum pelepasan hak tanah valid dan sebelum cacat mutu fisik (defect list) diperbaiki.
+Akuntabilitas	Geotagging & audit trail	Setiap hasil ukur lapangan, foto kondisi PSU, dan perubahan status tercatat beserta koordinat GPS dan jejak waktu.
+Efisiensi Aset	Integrasi BAST ke KIB BMD	Memastikan seluruh tanah dan konstruksi PSU yang diserahkan langsung tercatat sebagai aset Pemkab Sidoarjo dan teralokasi pemeliharaannya.
+Keputusan	Insight & WebGIS 18 Kecamatan	Data transaksi diubah menjadi peta sebaran, daftar prioritas penagihan pengembang, dan rekomendasi kebijakan pimpinan.
+2. Untuk Siapa Aplikasi Ini
+SIM-PSU Sidoarjo ditujukan bagi pihak yang mengajukan, memverifikasi, mengelola aset, dan mengawasi penyelenggaraan serta penyerahan PSU perumahan di Kabupaten Sidoarjo.
+Persona Pengguna	Kebutuhan Utama
+Pengembang (Developer)	Mengajukan penyerahan PSU (sekaligus/bertahap), mengunggah berkas administrasi, memantau status revisi, melaporkan perbaikan defect list, dan mengunduh BA/BAST.
+Admin Sekretariat PSU (DP2CKTR)	Menginput baseline siteplan, memvalidasi akun pengembang, menjadwalkan rapat & survei Tim Verifikasi, memantau SLA, dan menerbitkan nomor BA/BAST.
+Tim Verifikasi Administrasi	Memeriksa legalitas perusahaan, siteplan disahkan, PBG/SLF, dokumen lingkungan, dan keabsahan pelepasan hak/pemecahan sertifikat bidang PSU.
+Tim Verifikasi Teknis Lapangan	Melakukan survei fisik via ponsel (geotagging), membandingkan luas siteplan vs aktual, mengisi checklist Prasarana/Sarana/Utilitas, dan mencatat defect list.
+Verifikator Aset (BPKAD)	Memverifikasi rincian luas & nilai aset pasca-BAST, menerbitkan kode barang/nomor register KIB (KIB A, C, D), dan mencatat serah kelola ke OPD teknis.
+Verifikator Wilayah (Kecamatan/Desa)	Memantau status PSU perumahan di wilayahnya serta melaporkan perumahan yang pengembangnya tidak diketahui/terlantar untuk diproses melalui jalur khusus.
+Pimpinan Daerah (Bupati/Sekda/Kadis)	Melihat dashboard eksekutif, peta sebaran WebGIS 18 kecamatan, tren perolehan aset BMD, daftar pengembang menunggak, dan management brief.
+2.1 Hak Akses
+Role	Hak Akses Ringkas
+Super Admin / Sekretariat PSU	Konfigurasi sistem, manajemen user & role, input baseline perumahan, penjadwalan verifikasi, penerbitan BA/BAST, dan audit log.
+Tim Verifikasi Administrasi	Review berkas legalitas & pertanahan, input catatan revisi, dan persetujuan/paraf tahap administrasi.
+Tim Verifikasi Teknis (OPD Teknis)	Akses jadwal survei, input checklist lapangan & geotagging, pembuatan defect list, verifikasi perbaikan, dan paraf BAPL.
+Verifikator Aset (BPKAD)	Akses data proyek berstatus BAST, input kode KIB & nilai aset BMD, serta ekspor data penatausahaan aset.
+Admin Kecamatan / Desa	Read-only data perumahan di kecamatannya dan input pelaporan awal PSU terlantar/pengembang pailit.
+Pengembang (Developer)	Buat pengajuan baru, unggah berkas administrasi, lihat hasil survei, unggah bukti perbaikan defect, dan unduh dokumen BA/BAST miliknya.
+Viewer / Pimpinan Eksekutif	Akses penuh read-only ke Dashboard Eksekutif, WebGIS, Analytics, Insight, dan Laporan Periodik.
+3. Apa yang Dihasilkan
+3.1 Output Utama
+•	Dashboard Kondisi & Capaian Penyerahan PSU (Administrasi vs Fisik vs Tercatat BMD).
+•	Peta Spasial WebGIS sebaran perumahan dan poligon PSU di 18 Kecamatan Kabupaten Sidoarjo.
+•	Sistem Pengajuan & Verifikasi Administrasi Digital (mendukung skema penyerahan sekaligus dan bertahap).
+•	Aplikasi Survei Lapangan Geotagging dengan checklist teknis Permendagri No. 15 Tahun 2026.
+•	Manajemen Defect List & Penghitung Masa Pemeliharaan fisik pengembang.
+•	Generator Dokumen Resmi Otomatis (BA Penyerahan Administrasi, BAPL, BAST Fisik/Akhir) ber-QR Code.
+•	Register Integrasi Aset BMD (KIB A, C, D) siap kirim ke BPKAD.
+•	Analytics, Early Warning System, & Management Brief periodik untuk pimpinan.
+3.2 Contoh Output Dashboard (Kartu KPI)
+Kartu KPI	Contoh Nilai	Keterangan
+Total Perumahan Terdata	412 Perumahan	Terdaftar berdasarkan siteplan disahkan di 18 kecamatan
+BA Administrasi Terbit	248 (60,2%)	Lolos verifikasi legalitas & pelepasan hak tanah PSU
+BAST Akhir Selesai	185 (44,9%)	Lulus verifikasi fisik, masa pemeliharaan, & serah terima akhir
+Dalam Perbaikan (Defect)	34 Perumahan	Sedang menyelesaikan temuan cacat mutu hasil survei lapangan
+PSU Terlantar / Pailit	29 Perumahan	Diproses melalui jalur khusus fasilitasi Pemda
+Total Luas PSU Diserahkan	318,4 Ha	Akumulasi Prasarana, Sarana, dan Utilitas yang telah BAST
+Estimasi Nilai Aset BMD	Rp 1,42 Triliun	Nilai perolehan/taksiran tercatat di KIB BPKAD
+4. Fitur Utama
+Fitur	Deskripsi
+Dashboard Operasional & Eksekutif	Ringkasan KPI nasional/daerah, progres administrasi vs fisik, grafik capaian 18 kecamatan, dan alert keterlambatan.
+Baseline & Multi-Stage Manager	Pencatatan data siteplan induk dan pembagian skema penyerahan Sekaligus atau Bertahap (Klaster/Blok) beserta kalkulasi proporsi luas wajib PSU.
+E-Administrasi & Validasi Legal	Unggah dokumen digital terstruktur (permohonan, legalitas, pelepasan hak tanah, siteplan, PBG/SLF, lingkungan) dengan status per berkas.
+Collaborative OPD Review	Ruang kerja verifikasi paralel oleh lintas OPD (DP2CKTR, DPMPTSP, BPKAD, DLHK, PUBMSDA, Dishub, Dispurapar, Bagian Kesra, Bagian Umum, Bappekab) sesuai kewenangan teknis.
+Mobile Survei & Geotagging (PWA)	Form survei lapangan mobile dengan checklist Prasarana/Sarana/Utilitas, komparasi luas siteplan vs aktual, dan kamera GPS terkunci.
+Defect List & Maintenance Timer	Pencatatan titik kerusakan lapangan, penguncian status hingga perbaikan diverifikasi, serta countdown masa pemeliharaan pengembang.
+Auto-Document & E-Sign Generator	Pembuatan otomatis draf BA Administrasi, BAPL, dan BAST Akhir dengan QR Code validasi dan kesiapan integrasi TTE (BSrE).
+Integrasi Pencatatan BMD	Konversi otomatis objek PSU berstatus BAST Akhir ke format KIB (KIB A Tanah, KIB C Gedung, KIB D Jalan/Jaringan) dan penetapan OPD pengelola.
+WebGIS Sebaran PSU Sidoarjo	Peta interaktif poligon perumahan dan aset PSU dengan kode warna status (Merah: Menunggak, Kuning: Proses/Revisi, Biru: BA Admin, Hijau: BAST/BMD).
+Modul PSU Terlantar / Pailit	Alur khusus pendataan dan verifikasi sepihak untuk perumahan yang pengembangnya tidak diketahui/pailit sesuai Permendagri No. 15 Tahun 2026.
+Early Warning & Analytics	Pengingat otomatis via WhatsApp/Email atas tenggat defect, masa pemeliharaan, atau keterlambatan pengajuan, serta analitik kepatuhan pengembang.
+Smart Recommendation & Brief	Rekomendasi prioritas penagihan/penertiban PSU, deteksi anomali selisih luas, dan penyusunan ringkasan eksekutif otomatis.
+5. Data dan Sumber Data
+Data utama berasal dari pengesahan siteplan di DP2CKTR, pengajuan pengembang, hasil pemeriksaan Tim Verifikasi lintas OPD, serta pencatatan aset di BPKAD.
+Kelompok Data	Elemen Data
+Identitas Pengembang	Nama PT/CV, NIB, NPWP, nama direktur, alamat kantor, kontak PIC, status kepatuhan.
+Identitas Perumahan (Baseline)	Kode proyek, nama perumahan, kecamatan (18 kecamatan), desa/kelurahan, koordinat & poligon GeoJSON, nomor & tanggal siteplan, luas total lahan, luas kavling efektif, luas wajib PSU, skema penyerahan (SEKALIGUS/BERTAHAP), jalur (REGULER/TERLANTAR).
+Dokumen Administrasi	Surat permohonan, akta pendirian, sertifikat induk (HGB/HM), bukti pelepasan hak/pemecahan bidang PSU, siteplan disahkan, nomor PBG/SLF, persetujuan lingkungan, jadwal tahapan penyerahan.
+Objek Fisik PSU (Permendagri 15/2026)	Kategori (PRASARANA, SARANA, UTILITAS), jenis item (jalan, drainase, sanitasi/IPAL, TPS, RTH, tempat ibadah, olahraga, fasum, air bersih, PJU, telekomunikasi, hidran, buzem), volume/luas siteplan vs aktual, satuan (m2, m1, unit), kondisi fisik, koordinat/poligon item.
+Survei & Defect List	Tanggal survei, tim petugas, titik koordinat temuan kerusakan, foto geotagging sebelum & sesudah perbaikan, tenggat waktu perbaikan, status defect, durasi masa pemeliharaan.
+Berita Acara & Legalitas Serah Terima	Nomor & tanggal BA Penyerahan Administrasi, BAPL, BAST Fisik, BAST Akhir, file dokumen bertanda tangan, hash QR validasi.
+Data Aset BMD (BPKAD)	Kode barang BMD, jenis KIB (KIB A, KIB C, KIB D), nomor register aset, nomor sertifikat Hak Pakai Pemkab, nilai perolehan/taksiran (Rp), OPD pengelola teknis.
+User & Audit Log	Nama, NIP/ID, instansi/OPD, role, kontak, riwayat aktivitas persetujuan/perubahan data.
+5.1 Data yang Perlu Dikumpulkan Sejak MVP
+Data	Alasan
+Luas Wajib PSU pada Siteplan	Menjadi baseline utama untuk mengukur sisa kewajiban pengembang, terutama pada penyerahan bertahap.
+Status & Nomor Pelepasan Hak Tanah	Memastikan aspek legal kepemilikan lahan PSU beralih bersih kepada Pemkab Sidoarjo sebelum BAST.
+Hasil Ukur Aktual vs Siteplan	Mendeteksi penyusutan luas atau ketidaksesuaian spesifikasi fisik prasarana, sarana, dan utilitas di lapangan.
+Foto Geotagging & Defect List	Bukti autentik kondisi fisik lapangan dan kontrol wajib perbaikan sebelum BAST Akhir diterbitkan.
+Tanggal Mulai & Selesai Masa Pemeliharaan	Memastikan pengembang tetap bertanggung jawab atas pemeliharaan fisik selama masa transisi sebelum serah terima akhir.
+Kode KIB & Nilai Aset Pasca-BAST	Menjamin setiap BAST Akhir berujung pada pencatatan resmi di neraca aset Pemerintah Kabupaten Sidoarjo.
+6. Model dan Teknologi AI
+AI diterapkan secara bertahap setelah data baseline dan transaksi verifikasi berjalan stabil. AI berfungsi sebagai asisten analisis dan pendukung keputusan (decision support); keputusan verifikasi dan pengesahan hukum tetap berada pada Tim Verifikasi dan Pimpinan Daerah.
+Fungsi AI	Kegunaan
+Anomaly & Discrepancy Detection	Mendeteksi otomatis selisih tidak wajar antara luas PSU di siteplan dengan hasil ukur lapangan atau proporsi wajib PSU terhadap luas lahan total.
+Predictive Compliance & Risk Scoring	Memprediksi pengembang atau proyek yang berisiko tinggi menunggak penyerahan atau gagal memenuhi tenggat perbaikan defect list berdasarkan pola histori.
+Smart Prioritization Engine	Merekomendasikan urutan prioritas penagihan/penertiban PSU per kecamatan berdasarkan luas lahan strategis, potensi banjir (drainase), atau kebutuhan RTH publik.
+Asset Valuation Estimator	Memberikan estimasi awal nilai taksiran aset PSU berdasarkan luas dan jenis konstruksi (jalan paving/beton, saluran, RTH) sebagai referensi awal BPKAD.
+Insight & Management Brief Generator	Mengolah data capaian penyerahan dan hambatan verifikasi bulanan menjadi narasi laporan ringkas siap baca untuk Bupati, Sekda, dan Kepala DP2CKTR.
+6.1 Teknologi yang Disarankan
+Komponen	Rekomendasi
+Frontend Web & PWA Mobile	React / Next.js (Tailwind CSS) dengan dukungan Progressive Web App (PWA) untuk akses kamera GPS lapangan.
+Backend & API	Node.js (NestJS) atau Laravel (PHP 8.3+) dengan arsitektur RESTful API terstandar.
+Database & Spasial	PostgreSQL dengan ekstensi PostGIS untuk pengolahan data poligon lahan dan kalkulasi luas otomatis.
+WebGIS Engine	Leaflet / Mapbox GL JS dengan dukungan layer GeoJSON, WMS/WFS terintegrasi peta dasar Kabupaten Sidoarjo.
+Authentication & E-Sign	RBAC internal + kesiapan integrasi SSO Pemkab Sidoarjo dan API BSrE (BSSN) untuk Tanda Tangan Elektronik.
+Object Storage	MinIO / S3-compatible storage terenkripsi untuk arsip siteplan, sertifikat, foto geotagging, dan dokumen BA/BAST.
+Notification	WhatsApp Gateway resmi instansi & Email SMTP untuk Early Warning System.
+AI Service	LLM API terintegrasi untuk penyusunan Management Brief dan modul aturan statistik untuk deteksi anomali.
+7. Desain dan Pengalaman Pengguna
+7.1 Prinsip Desain
+•	Dashboard-First & Map-Centric: Menampilkan ringkasan status administrasi, fisik, dan peta sebaran kecamatan langsung pada halaman utama pimpinan.
+•	Dual-Track Status Clarity: Memisahkan dengan tegas indikator progres Administrasi dan Fisik pada setiap kartu proyek agar tidak membingungkan pengguna.
+•	Mobile-First untuk Lapangan: Tampilan survei lapangan dioptimalkan untuk layar ponsel petugas dengan tombol besar, akses kamera langsung, dan simpan sementara (offline cache) saat sinyal lemah.
+•	Formal & Kredibel: Mengikuti standar visual sistem informasi pemerintahan Kabupaten Sidoarjo yang bersih, terstruktur, dan mudah diaudit.
+7.2 Layout Utama
+Komponen UI	Spesifikasi
+Panel Kiri (Sidebar)	Dashboard, Data Perumahan (Baseline), Pengajuan & Verifikasi Administrasi, Survei Fisik & Defect List, BAST & Aset BMD, WebGIS Sidoarjo, PSU Terlantar/Pailit, Analytics & Insight, Laporan, Pengaturan.
+Area Kanan (Workspace)	Kartu KPI, peta interaktif 18 kecamatan, tabel filter multi-kriteria, split-view verifikasi dokumen, form checklist survei, dan pratinjau draf Berita Acara.
+Quick Action	Input Baseline Baru, Ajukan Penyerahan, Mulai Survei Lapangan, Catat Defect, Terbitkan BA/BAST.
+Indikator Status (Color Coded)	Merah: Menunggak / Belum Ajukan; Kuning: Verifikasi / Revisi / Perbaikan Defect; Biru: BA Administrasi Terbit / Masa Pemeliharaan; Hijau: BAST Akhir & Tercatat BMD.
+Responsive	Desktop untuk Sekretariat, Verifikator Admin, BPKAD, dan Pimpinan; Mobile/Tablet untuk Verifikator Lapangan dan Pengembang.
+8. Alur Operasional dan Logika Prioritisasi
+8.1 Alur Penyerahan Administrasi (Tahap 1)
+1.	Sekretariat DP2CKTR menginput baseline perumahan dari siteplan disahkan (menetapkan skema Sekaligus atau Bertahap).
+2.	Pengembang login dan mengunggah berkas permohonan administrasi (legalitas, sertifikat induk, pelepasan hak tanah PSU, siteplan, PBG/SLF, dokumen lingkungan).
+3.	Sistem memvalidasi kelengkapan format dokumen dan mendistribusikan notifikasi ke Tim Verifikasi Administrasi.
+4.	Tim Verifikasi memeriksa keabsahan berkas; jika ada kekurangan, status menjadi Revisi Berkas dan dikembalikan ke pengembang.
+5.	Setelah seluruh berkas dinyatakan valid dan pelepasan hak tanah PSU terverifikasi, sistem men-generate Berita Acara Penyerahan Administrasi untuk ditandatangani. Status proyek naik ke Siap Verifikasi Fisik.
+8.2 Alur Penyerahan Fisik & Masa Pemeliharaan (Tahap 2)
+6.	Pengembang mengajukan permohonan pemeriksaan fisik setelah konstruksi PSU selesai.
+7.	Sekretariat menetapkan jadwal survei dan menugaskan Tim Verifikasi Teknis lintas OPD (DP2CKTR, PUBMSDA, DLHK, Dishub).
+8.	Petugas turun ke lokasi menggunakan aplikasi mobile, mengukur luas aktual tiap item PSU, mengisi checklist kondisi teknis, dan mengambil foto geotagging.
+9.	Percabangan Hasil Survei:
+o	Jika ditemukan kerusakan / ketidaksesuaian: Petugas menandai titik defect list beserta tenggat waktu perbaikan. Status proyek dikunci pada Perbaikan Fisik hingga pengembang mengunggah foto perbaikan dan diverifikasi ulang oleh petugas.
+o	Jika kondisi fisik sesuai & masa pemeliharaan terpenuhi: Tim Verifikasi menyetujui dan menandatangani Berita Acara Pemeriksaan Lapangan (BAPL).
+8.3 Alur BAST Akhir & Pencatatan Aset BMD (Tahap 3)
+10.	Berdasarkan BA Penyerahan Administrasi dan BAPL, sistem menerbitkan Berita Acara Serah Terima (BAST) Fisik / BAST Akhir antara Pengembang dan Bupati/Pejabat yang ditunjuk.
+11.	Data rincian tanah dan konstruksi PSU pada BAST Akhir otomatis masuk ke antrean kerja Verifikator Aset BPKAD.
+12.	BPKAD memverifikasi nilai aset, menetapkan kode barang/nomor register KIB (KIB A, C, D), mencatat sertifikat Hak Pakai Pemkab, dan menetapkan OPD pengelola teknis pemeliharaan. Status proyek selesai (Tercatat BMD).
+8.4 Logika Insight dan Prioritas
+Faktor	Logika Sistem
+Tunggakan Pengajuan	Perumahan dengan unit terbangun >80% atau melewati jadwal tahapan siteplan namun belum mengajukan penyerahan otomatis ditandai Prioritas Tinggi (Merah) dan memicu EWS.
+Selisih Luas Siteplan vs Aktual	Jika hasil ukur lapangan <95% dari luas wajib pada siteplan, sistem memunculkan peringatan anomali luas dan menahan persetujuan BAPL.
+Keterlambatan Perbaikan Defect	Item defect list yang melewati tenggat waktu perbaikan otomatis naik statusnya menjadi Overdue pada dashboard Sekretariat dan pimpinan.
+Masa Pemeliharaan Berakhir	Sistem mengirim pengingat H-14 dan H-3 sebelum masa pemeliharaan fisik berakhir untuk penjadwalan pemeriksaan akhir BAST.
+Kesenjangan BAST vs Pencatatan BMD	Proyek berstatus BAST Akhir yang belum diregistrasi KIB oleh BPKAD lebih dari 14 hari kerja ditandai sebagai backlog pencatatan aset.
+Perumahan Terlantar / Pailit	Laporan dari Kecamatan/Desa terkait perumahan tanpa pengembang aktif otomatis masuk ke antrean jalur khusus fasilitasi Pemda.
+9. Infrastruktur dan Development
+Komponen Infrastruktur	Kebutuhan
+Web & API Hosting	Server internal Diskominfo Kabupaten Sidoarjo atau cloud pemerintah (VPS/Containerized Docker) dengan ketersediaan tinggi.
+Database Spasial	PostgreSQL 15+ dengan ekstensi PostGIS untuk penyimpanan relasional dan geometri poligon PSU.
+File & Document Storage	Object Storage (MinIO/S3) dengan enkripsi at-rest untuk penyimpanan PDF sertifikat, siteplan, foto geotagging, dan BA/BAST.
+Notification Gateway	Integrasi WhatsApp Business API / Gateway resmi Pemkab Sidoarjo dan SMTP Server untuk notifikasi EWS.
+AI & Analytics Service	Layanan pemrosesan analitik terjadwal (cron/queue) dan koneksi API LLM untuk generasi management brief.
+Logging & Audit	Pencatatan terpusat seluruh aktivitas login, perubahan status berkas, hasil survei, dan ekspor data.
+Backup & Disaster Recovery	Automated daily incremental backup dan weekly full backup untuk database serta penyimpanan dokumen.
+9.1 Entitas Database Awal
+•	users & roles
+•	opd_units & kecamatan_desa
+•	developers (data pengembang)
+•	housing_projects (baseline perumahan & siteplan)
+•	handover_stages (tahapan penyerahan sekaligus / per klaster)
+•	admin_documents (berkas administrasi & status verifikasi)
+•	psu_items (rincian item Prasarana, Sarana, Utilitas & luasan siteplan vs aktual)
+•	field_surveys & survey_checklists
+•	defect_lists (temuan kerusakan, koordinat geotagging, foto sebelum/sesudah)
+•	official_minutes (dokumen BA Administrasi, BAPL, BAST Fisik, BAST Akhir)
+•	bmd_assets (nomor register KIB A/C/D, nilai aset, OPD pengelola)
+•	abandoned_psu_cases (jalur khusus PSU terlantar/pailit)
+•	notifications, ews_alerts, insight_results, & audit_logs
+10. Pengembangan Aplikasi
+10.1 Fitur MVP (Fase 1)
+•	Login & manajemen hak akses lintas OPD dan Pengembang (RBAC).
+•	Master data 18 Kecamatan/Desa, Pengembang, dan Baseline Perumahan (siteplan & luas wajib PSU).
+•	Pengajuan penyerahan PSU (skema sekaligus & bertahap).
+•	Modul E-Administrasi (unggah dokumen, review paralel tim verifikasi, revisi berkas).
+•	Generator otomatis draf Berita Acara Penyerahan Administrasi.
+•	Dashboard operasional dasar & riwayat audit transaksi.
+10.2 Fase 2 (Verifikasi Fisik & BAST)
+•	Aplikasi survei lapangan mobile (PWA) dengan checklist teknis Permendagri No. 15 Tahun 2026.
+•	Fitur kamera geotagging terkunci dan pengukuran luas aktual vs siteplan.
+•	Manajemen defect list dan penghitung mundur (timer) masa pemeliharaan fisik.
+•	Generator otomatis BAPL dan BAST Fisik / BAST Akhir ber-QR Code.
+•	Notifikasi otomatis (WhatsApp/Email) untuk revisi berkas dan tenggat defect list.
+10.3 Fase 3 (Integrasi BMD, WebGIS & AI Insight)
+•	Modul integrasi pencatatan aset BMD/KIB bersama BPKAD dan serah kelola OPD teknis.
+•	Peta interaktif WebGIS sebaran perumahan dan poligon PSU di 18 Kecamatan Sidoarjo.
+•	Modul jalur khusus penanganan PSU terlantar / pengembang pailit.
+•	Early Warning System (EWS) tunggakan penyerahan perumahan.
+•	AI Anomaly Detection (selisih luas), Smart Prioritization, dan Management Brief otomatis untuk pimpinan.
+10.4 Timeline Pengembangan (Estimasi 12 Minggu)
+Waktu	Fokus	Output
+Minggu 1–2	Analisis & Perancangan	Finalisasi SOP Permendagri 15/2026, ERD PostgreSQL/PostGIS, user flow, dan wireframe UI/UX.
+Minggu 3–4	Core & E-Administrasi	Manajemen baseline perumahan, skema bertahap, unggah & verifikasi berkas administrasi, draf BA Admin.
+Minggu 5–7	Survei Lapangan & Defect	PWA Mobile Survei geotagging, checklist Prasarana/Sarana/Utilitas, defect list, dan timer pemeliharaan.
+Minggu 8–9	BAST, BMD & Jalur Khusus	Generator BAPL & BAST Akhir, modul registrasi KIB BPKAD, dan modul PSU terlantar/pailit.
+Minggu 10–11	WebGIS, EWS & Analytics	Peta sebaran 18 kecamatan, dashboard eksekutif, notifikasi WA/Email, dan modul insight awal.
+Minggu 12	Testing, UAT & Pilot	Pengujian keamanan, UAT bersama DP2CKTR, BPKAD, OPD teknis & pengembang, pelatihan, dan pilot launch.
+11. Pengujian
+Jenis Uji	Fokus Pengujian
+Functional Testing	Alur pengajuan sekaligus vs bertahap, verifikasi administrasi, kunci defect list, masa pemeliharaan, penerbitan BA/BAST, dan pencatatan BMD.
+Spatial & Geotagging Testing	Akurasi penguncian koordinat GPS kamera lapangan, unggah poligon GeoJSON, dan kalkulasi selisih luas siteplan vs aktual.
+Integration & Export Testing	Kesesuaian format ekspor data aset KIB (KIB A, C, D) untuk BPKAD dan validasi QR Code dokumen Berita Acara.
+Usability Testing	Kemudahan penggunaan form pengajuan oleh pengembang dan kepraktisan aplikasi mobile survei saat digunakan petugas di lapangan (termasuk saat sinyal lemah).
+Security & RBAC Testing	Isolasi data antar-pengembang (pengembang A tidak bisa melihat berkas pengembang B), otorisasi paraf lintas OPD, dan kelengkapan audit trail.
+Performance Testing	Kecepatan muat peta WebGIS 18 kecamatan, dashboard eksekutif, dan proses unggah dokumen siteplan beresolusi tinggi.
+Recovery Testing	Simulasi backup dan pemulihan database spasial serta arsip dokumen legalitas.
+11.1 Acceptance Criteria MVP
+•	Login dan isolasi hak akses sesuai role (Sekretariat, Tim Verifikasi OPD, BPKAD, Pengembang, Pimpinan) berjalan akurat.
+•	Data baseline perumahan (siteplan dan luas wajib PSU) dapat diinput dan dibagi dalam skema sekaligus atau bertahap.
+•	Pengembang dapat mengajukan permohonan dan mengunggah seluruh dokumen wajib administrasi.
+•	Tim Verifikasi dapat melakukan review, meminta revisi, dan menyetujui berkas hingga terbit draf BA Penyerahan Administrasi.
+•	Dashboard utama menampilkan rekapitulasi status perumahan per kecamatan secara real-time dan jejak audit tersimpan lengkap.
+12. Keamanan dan Privasi
+Dokumen dalam SIM-PSU mencakup akta perusahaan, sertifikat hak atas tanah, dokumen pengesahan tata ruang, dan catatan aset daerah yang memiliki kekuatan hukum tinggi.
+Aspek	Kebutuhan
+Autentikasi & Otorisasi	Wajib login terautentikasi dengan kebijakan kata sandi kuat dan Role-Based Access Control (RBAC) ketat.
+Isolasi Data Pengembang	Akun pengembang hanya dapat mengakses data proyek perumahan miliknya sendiri; akses lintas proyek hanya dimiliki Tim Verifikasi Pemkab Sidoarjo.
+Integritas Bukti Lapangan	Menonaktifkan unggahan dari galeri perangkat untuk foto kondisi fisik utama guna mencegah manipulasi lokasi/waktu survei.
+Keamanan Dokumen & TTE	Penyimpanan berkas terenkripsi dan penyematan QR Code verifikasi keaslian pada setiap dokumen BA/BAST yang diterbitkan sistem.
+Audit Trail Tidak Terhapus	Setiap persetujuan berkas, perubahan luas, penutupan defect list, dan penerbitan BAST tercatat permanen beserta identitas pengguna dan timestamp.
+Privasi Model AI	Data sertifikat tanah dan dokumen legalitas internal tidak digunakan untuk melatih model AI publik.
+13. Persiapan Deployment
+13.1 Environment
+•	Development: Lingkungan pengembangan tim IT.
+•	Staging / UAT: Lingkungan uji coba bersama Tim Verifikasi DP2CKTR, BPKAD, OPD teknis, dan perwakilan pengembang.
+•	Production: Lingkungan operasional resmi pada infrastruktur server Pemerintah Kabupaten Sidoarjo.
+13.2 Checklist Deployment
+•	Database PostgreSQL + PostGIS production terkonfigurasi dan teroptimasi.
+•	Layer batas administrasi 18 Kecamatan dan Desa/Kelurahan Kabupaten Sidoarjo telah dimuat ke dalam WebGIS.
+•	Object storage dokumen dan foto geotagging siap dengan kapasitas dan backup otomatis.
+•	Akun admin, akun verifikator lintas OPD (DP2CKTR, BPKAD, DPMPTSP, DLHK, PUBMSDA, Dishub), dan akun kecamatan siap.
+•	Template resmi BA Penyerahan Administrasi, BAPL, dan BAST sesuai tata naskah dinas Pemkab Sidoarjo telah terpasang.
+•	Notifikasi WhatsApp/Email berjalan dan audit log aktif.
+14. Domain dan Branding
+14.1 Nama Produk
+•	SIM-PSU Sidoarjo (Sistem Informasi Monitoring Penyerahan PSU Perumahan Kabupaten Sidoarjo)
+•	Sub-domain resmi yang disarankan: simpsu.sidoarjokab.go.id atau psu-dp2cktr.sidoarjokab.go.id
+14.2 Tagline
+"Tertib Administrasi, Terukur Fisiknya, Pasti Aset Daerahnya."
+14.3 Arah Visual Branding
+Elemen	Rekomendasi
+Karakter	Formal pemerintahan, presisi tata ruang, transparan, dan berbasis data spasial.
+Warna Utama	Biru Tua / Navy Pemerintahan (#0F294A) dan Hijau Toska / Emerald Sidoarjo (#0D6E5B).
+Warna Aksen Status	Hijau (BAST/BMD Selesai), Biru Muda (BA Administrasi), Kuning/Oranye (Verifikasi/Perbaikan Defect), Merah (Menunggak/Risiko).
+Komponen Visual	Logo Pemkab Sidoarjo, peta poligon 18 kecamatan, kartu status dual-track (Admin vs Fisik), ikon kategori PSU, dan QR Code validasi.
+15. Publish dan Launch
+Tahap	Nama	Aktivitas
+1	Internal Testing	Pengujian alur end-to-end oleh tim pengembang dan Admin Sekretariat DP2CKTR.
+2	Pilot Project	Uji coba terbatas pada 10–15 proyek perumahan prioritas (kombinasi skema sekaligus, bertahap, dan PSU bermasalah) bersama Tim Verifikasi lintas OPD dan BPKAD.
+3	Evaluasi & Penyesuaian	Penyempurnaan checklist teknis lapangan, penyesuaian redaksional template BA/BAST, dan perbaikan UX berdasarkan masukan pilot.
+4	Sosialisasi & Bimtek	Bimbingan teknis penggunaan portal bagi asosiasi/perusahaan pengembang perumahan di Kabupaten Sidoarjo serta verifikator kecamatan.
+5	Full Launch	Peluncuran resmi oleh Bupati/Kepala DP2CKTR dan kewajiban pengajuan penyerahan PSU seluruhnya melalui SIM-PSU Sidoarjo.
+15.1 Checklist Sebelum Launch
+•	Alur pengajuan sekaligus dan bertahap teruji dari baseline hingga BA Administrasi.
+•	Aplikasi survei lapangan geotagging dan penguncian defect list berfungsi akurat di perangkat seluler.
+•	Ekspor data aset BAST ke format KIB diverifikasi dan disetujui oleh Bidang Aset BPKAD.
+•	Peta WebGIS 18 kecamatan menampilkan status perumahan secara akurat.
+•	Buku panduan penggunaan (User Manual) untuk Pengembang dan Tim Verifikasi tersedia di dalam portal.
+16. Monitoring dan Iterasi
+Kategori	Metrik	Indikator
+Kepatuhan Pengajuan	Rasio Pengajuan PSU	Jumlah perumahan yang mengajukan penyerahan dibandingkan total siteplan yang telah disahkan.
+Kecepatan Layanan	Turnaround Time Verifikasi	Rata-rata hari kerja dari berkas masuk hingga terbit BA Administrasi dan dari survei fisik hingga BAST Akhir.
+Kualitas Fisik	Rasio & Durasi Defect	Persentase proyek yang memiliki temuan cacat mutu dan rata-rata waktu penyelesaian perbaikan oleh pengembang.
+Integrasi Aset	Conversion Rate ke BMD	Persentase BAST Akhir yang telah resmi terbit nomor register KIB di BPKAD dalam ≤14 hari kerja.
+Penanganan Khusus	Penyelesaian PSU Terlantar	Jumlah perumahan terlantar/pailit yang berhasil diamankan status asetnya melalui jalur fasilitasi Pemda.
+Performa Sistem	Uptime & Response Time	Ketersediaan layanan ≥99,5% dan waktu muat peta/dashboard <3 detik.
+16.1 Roadmap Iterasi Lanjutan
+•	Integrasi API langsung (machine-to-machine) dengan SIMBG (penarikan data PBG/SLF otomatis) dan OSS RBA.
+•	Integrasi langsung dengan sistem penatausahaan aset SIPD / SIMDA BMD BPKAD Kabupaten Sidoarjo.
+•	Portal keterbukaan informasi publik bagi warga perumahan untuk mengecek apakah fasilitas umum di perumahannya sudah diserahkan ke Pemkab Sidoarjo atau masih tanggung jawab pengembang.
+•	Pengembangan AI Computer Vision untuk membantu mendeteksi estimasi luas perkerasan jalan dan tutupan hijau dari foto udara/drone siteplan.
+Lampiran A. Functional Requirements
+ID	Requirement	Prioritas
+FR-01	Login, manajemen akun, dan kontrol hak akses berbasis peran (RBAC) lintas OPD dan Pengembang.	Must Have
+FR-02	Manajemen baseline perumahan (data siteplan, luas total, luas efektif, luas wajib PSU, skema sekaligus/bertahap).	Must Have
+FR-03	Pengajuan permohonan penyerahan PSU oleh pengembang dan unggah dokumen administrasi terstruktur.	Must Have
+FR-04	Verifikasi dokumen administrasi paralel oleh Tim Verifikasi beserta fitur catatan revisi per dokumen.	Must Have
+FR-05	Generator otomatis draf Berita Acara Penyerahan Administrasi ber-QR Code.	Must Have
+FR-06	Penjadwalan survei lapangan dan checklist teknis fisik berdasarkan kategori Permendagri No. 15 Tahun 2026 (Prasarana, Sarana, Utilitas).	Must Have
+FR-07	Komparasi otomatis luas/volume pada siteplan vs hasil ukur aktual di lapangan.	Must Have
+FR-08	Aplikasi survei mobile (PWA) dengan penguncian kamera GPS (geotagging) dan timestamp.	Must Have
+FR-09	Pencatatan defect list (cacat mutu) yang mengunci penerbitan BAPL/BAST sebelum perbaikan diverifikasi.	Must Have
+FR-10	Penghitung waktu mundur (timer) masa pemeliharaan fisik pengembang sebelum BAST Akhir.	Must Have
+FR-11	Generator otomatis BAPL dan BAST Fisik / BAST Akhir beserta arsip dokumen bertanda tangan.	Must Have
+FR-12	Modul pencatatan & ekspor data aset pasca-BAST ke format KIB (KIB A, C, D) untuk BPKAD.	Must Have
+FR-13	Dashboard eksekutif capaian penyerahan administrasi, fisik, luas PSU (Ha), dan nilai aset BMD.	Must Have
+FR-14	Peta interaktif WebGIS sebaran perumahan dan poligon PSU di 18 Kecamatan Kabupaten Sidoarjo.	Should Have
+FR-15	Modul jalur khusus penanganan PSU terlantar / pengembang pailit atau tidak diketahui.	Should Have
+FR-16	Early Warning System (notifikasi WhatsApp/Email) untuk tunggakan pengajuan dan tenggat defect list.	Should Have
+FR-17	Deteksi anomali selisih luas, skor risiko kepatuhan pengembang, dan management brief otomatis berbasis AI.	Could Have
+Lampiran B. Non-Functional Requirements
+ID	Kategori	Requirement
+NFR-01	Performance	Waktu muat halaman dashboard dan tabel monitoring maksimal 3 detik pada beban operasional normal.
+NFR-02	Usability	Antarmuka intuitif bagi staf teknis non-IT maupun admin perusahaan pengembang dengan panduan alur visual.
+NFR-03	Offline Resilience	Form survei lapangan mobile mendukung penyimpanan draf sementara di perangkat saat koneksi internet lokasi lemah.
+NFR-04	Security	Enkripsi komunikasi HTTPS/TLS, enkripsi dokumen legalitas, dan isolasi ketat antar-akun pengembang.
+NFR-05	Auditability	Seluruh transaksi perubahan status, revisi berkas, verifikasi defect, dan penerbitan BAST tercatat dalam audit log permanen.
+NFR-06	Spatial Accuracy	Mendukung standar proyeksi koordinat spasial nasional (WGS84 / EPSG:4326) dan format GeoJSON/Shapefile.
+NFR-07	Interoperability	Menyediakan REST API terdokumentasi untuk integrasi dengan portal Satu Data Sidoarjo, SIMBG, dan sistem aset BPKAD.
+NFR-08	Availability	Ketersediaan sistem minimal 99,5% dengan jadwal backup database dan file otomatis harian.
+Lampiran C. Data Model Awal
+Tabel	Field Utama
+users	id, name, nip_or_nik, opd_or_company_id, role_id, email, phone_wa, status
+roles	id, name, permissions
+kecamatan_desa	id, kode_kemendagri, nama_kecamatan, nama_desa, geojson_batas
+developers	id, company_name, nib, npwp, director_name, address, pic_contact, compliance_score
+housing_projects	id, developer_id, project_name, kecamatan_id, desa_id, siteplan_number, siteplan_date, total_area_m2, effective_area_m2, required_psu_area_m2, handover_scheme, process_track, geojson_polygon
+handover_stages	id, project_id, stage_name, admin_status, physical_status, maintenance_start_date, maintenance_end_date
+admin_documents	id, stage_id, doc_type, doc_number, land_release_cert_no, file_url, status, reviewer_note, verified_by, verified_at
+psu_items	id, stage_id, category, item_type, item_name, siteplan_volume, actual_volume, unit, condition, geojson_item
+field_surveys	id, stage_id, survey_date, lead_surveyor_id, team_members, overall_notes, status
+defect_lists	id, psu_item_id, survey_id, description, latitude, longitude, before_photo_url, due_date, after_photo_url, status
+official_minutes	id, stage_id, doc_category, letter_number, issued_date, signed_file_url, qr_verification_hash
+bmd_assets	id, psu_item_id, bast_id, bmd_code, kib_type, register_number, pemda_cert_number, asset_value_idr, managing_opd, registered_at
+abandoned_psu_cases	id, project_id, reporter_unit, announcement_date, negligence_ba_url, bupati_decree_no, status
+ews_alerts	id, project_id, alert_type, severity, message, recipient_id, sent_via, sent_at
+audit_logs	id, user_id, action, entity_name, entity_id, old_value, new_value, timestamp
+Lampiran D. Template Dashboard / Management Brief
+Bagian	Isi
+1. Executive Summary	Ringkasan capaian penyerahan PSU Kabupaten Sidoarjo periode berjalan, rasio BA Administrasi vs BAST Akhir, hambatan utama, dan rekomendasi kebijakan.
+2. KPI Utama	Total perumahan terdata, total luas wajib PSU (Ha), capaian BA Administrasi, capaian BAST Akhir, proyek dalam perbaikan defect, dan total nilai aset masuk BMD (Rp).
+3. Capaian Per Kecamatan	Peringkat dan perbandingan progres penyerahan PSU di seluruh 18 kecamatan Kabupaten Sidoarjo.
+4. Progres Administrasi vs Fisik	Analisis bottleneck (jumlah berkas tertahan di tahap pelepasan hak tanah vs tertahan di perbaikan fisik lapangan).
+5. Kepatuhan Pengembang	Daftar pengembang dengan penyerahan tepat waktu dan daftar pengembang yang menunggak melewati batas ketentuan.
+6. Kualitas Fisik & Defect List	Rekapitulasi temuan cacat mutu terbanyak (misal: kerusakan saluran drainase, perkerasan jalan lingkungan, kurangnya luas RTH, PJU mati).
+7. Realisasi Pencatatan BMD	Rekapitulasi luas tanah (KIB A) dan nilai konstruksi jalan/saluran/fasum (KIB C/D) yang telah tercatat di BPKAD dan diserahkan ke OPD teknis.
+8. Penanganan PSU Terlantar	Progres fasilitasi penyerahan sepihak untuk perumahan yang pengembangnya pailit atau tidak diketahui.
+9. Rekomendasi Tindak Lanjut	Daftar tindakan prioritas (penagihan administratif, peninjauan ulang lapangan, percepatan register KIB), PIC OPD, dan target waktu penyelesaian.
+Contoh Insight Otomatis
+•	"Capaian penerbitan BAST Akhir PSU Kabupaten Sidoarjo meningkat sebesar 14% pada triwulan ini, menambah aset tanah dan prasarana daerah senilai Rp 86,4 Miliar ke dalam daftar BMD BPKAD."
+•	"Terdapat 18 perumahan di Kecamatan Waru dan Taman yang telah mengantongi BA Penyerahan Administrasi lebih dari 6 bulan namun belum mengajukan verifikasi fisik; sistem merekomendasikan penerbitan surat peringatan pertama."
+•	"Temuan defect list terbanyak bulan ini berada pada komponen saluran drainase lingkungan (42%) dan kelengkapan PJU (28%), sehingga verifikasi lapangan perlu memperketat uji fungsi aliran air sebelum penerbitan BAPL."
+Lampiran E. Prompt Lovable / AI App Builder
+Plaintext
+Bangun aplikasi web dashboard dan monitoring bernama SIM-PSU Sidoarjo (Sistem Informasi Monitoring Penyerahan Prasarana, Sarana, dan Utilitas Umum Perumahan) untuk Dinas Perumahan, Permukiman, Cipta Karya dan Tata Ruang (DP2CKTR) Kabupaten Sidoarjo sesuai Permendagri Nomor 15 Tahun 2026.
+
+Gunakan layout dengan sidebar di kiri dan area konten utama di kanan.
+Menu Sidebar:
+1. Dashboard Eksekutif
+2. Data Perumahan (Baseline Siteplan)
+3. Verifikasi Administrasi
+4. Survei Fisik & Defect List
+5. BAST & Aset BMD (BPKAD)
+6. WebGIS 18 Kecamatan
+7. PSU Terlantar / Pailit
+8. Analytics & Insight
+9. Laporan & Management Brief
+10. Pengaturan & Hak Akses
+
+Fitur Utama yang Harus Dibangun:
+- Manajemen Baseline Perumahan: Input nama perumahan, kecamatan (dari 18 kecamatan di Sidoarjo), pengembang, nomor siteplan, luas total lahan, luas wajib PSU (m2), dan skema penyerahan (Sekaligus atau Bertahap per Klaster).
+- Monitoring Dual-Track (Administrasi vs Fisik): Setiap perumahan memiliki dua indikator progres terpisah.
+  1) Jalur Administrasi: Pengajuan pengembang, checklist dokumen (Permohonan, Legalitas, Pelepasan Hak Tanah PSU, Siteplan Sah, PBG/SLF, Dokumen Lingkungan), status revisi, dan tombol Generate BA Penyerahan Administrasi.
+  2) Jalur Fisik: Checklist pemeriksaan teknis lapangan berdasarkan kategori Permendagri No. 15 Tahun 2026 (Prasarana: Jalan, Drainase, Sanitasi, TPS, RTH; Sarana: Ibadah, Olahraga, Fasum; Utilitas: Air Bersih, PJU, Telekomunikasi, Proteksi Kebakaran), perbandingan luas siteplan vs luas aktual lapangan, upload foto geotagging (koordinat Lat/Long), manajemen Defect List (mengunci status BAST sampai kerusakan diperbaiki), serta penghitung mundur Masa Pemeliharaan.
+- Penerbitan BAPL & BAST Akhir: Generate dokumen berita acara resmi ber-QR Code dan alur pencatatan aset ke dalam KIB (KIB A, C, D) serta penetapan OPD pengelola teknis oleh verifikator BPKAD.
+- Dashboard Eksekutif & WebGIS: Kartu KPI (Total Perumahan, BA Administrasi Terbit, BAST Akhir Selesai, Dalam Perbaikan Defect, PSU Terlantar, Total Luas PSU dalam Ha, Estimasi Nilai Aset BMD dalam Rupiah), grafik progres 18 kecamatan Sidoarjo, peta interaktif status perumahan dengan kode warna (Merah: Menunggak, Kuning: Proses/Revisi, Biru: BA Admin Terbit, Hijau: BAST & BMD), serta halaman Insight otomatis dan Management Brief.
+
+Gunakan desain profesional formal untuk instansi pemerintah dengan warna utama biru tua (#0F294A) dan hijau toska (#0D6E5B), serta aksen warna status hijau, biru muda, kuning/oranye, dan merah.
+Catatan Penutup
+Dokumen Product Requirement Document (PRD) SIM-PSU Sidoarjo v2.0 ini telah disusun sesuai dengan kerangka format dokumen standar yang dilampirkan serta disesuaikan secara substansial dengan Permendagri Nomor 15 Tahun 2026. Sebelum memasuki tahap pengkodean (development), tim proyek disarankan untuk memfinalkan:
+1.	Format baku dokumen Berita Acara (BA Penyerahan Administrasi, BAPL, BAST Fisik/Akhir) sesuai tata naskah dinas Kabupaten Sidoarjo.
+2.	Daftar parameter teknis minimum tiap jenis Prasarana, Sarana, dan Utilitas yang disepakati bersama OPD teknis (DP2CKTR, PUBMSDA, DLHK, Dishub).
+3.	Standar struktur kolom ekspor data KIB yang dibutuhkan oleh Bidang Aset BPKAD Kabupaten Sidoarjo.
