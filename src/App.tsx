@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
 import {
   AbandonedStage,
   AuditLogEntry,
@@ -18,18 +18,42 @@ import { INITIAL_PROJECTS } from './data/initialData';
 import { assertPermission, canPerformAction, DomainAction } from './services/rbacPolicy';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
-import { AuditTrailModal } from './components/AuditTrailModal';
-import { DashboardView } from './views/DashboardView';
-import { PerumahanView } from './views/PerumahanView';
-import { VerifikasiAdminView } from './views/VerifikasiAdminView';
-import { SurveiFisikView } from './views/SurveiFisikView';
-import { BastBmdView } from './views/BastBmdView';
-import { WebGisView } from './views/WebGisView';
-import { PsuTerlantarView } from './views/PsuTerlantarView';
-import { AnalyticsView } from './views/AnalyticsView';
-import { LaporanBriefView } from './views/LaporanBriefView';
-import { PengaturanView } from './views/PengaturanView';
 import { getActiveStage, getMeasurementRatio } from './utils/formatters';
+
+const AuditTrailModal = lazy(() =>
+  import('./components/AuditTrailModal').then((m) => ({ default: m.AuditTrailModal }))
+);
+const DashboardView = lazy(() =>
+  import('./views/DashboardView').then((m) => ({ default: m.DashboardView }))
+);
+
+const PerumahanView = lazy(() =>
+  import('./views/PerumahanView').then((m) => ({ default: m.PerumahanView }))
+);
+const VerifikasiAdminView = lazy(() =>
+  import('./views/VerifikasiAdminView').then((m) => ({ default: m.VerifikasiAdminView }))
+);
+const SurveiFisikView = lazy(() =>
+  import('./views/SurveiFisikView').then((m) => ({ default: m.SurveiFisikView }))
+);
+const BastBmdView = lazy(() =>
+  import('./views/BastBmdView').then((m) => ({ default: m.BastBmdView }))
+);
+const WebGisView = lazy(() =>
+  import('./views/WebGisView').then((m) => ({ default: m.WebGisView }))
+);
+const PsuTerlantarView = lazy(() =>
+  import('./views/PsuTerlantarView').then((m) => ({ default: m.PsuTerlantarView }))
+);
+const AnalyticsView = lazy(() =>
+  import('./views/AnalyticsView').then((m) => ({ default: m.AnalyticsView }))
+);
+const LaporanBriefView = lazy(() =>
+  import('./views/LaporanBriefView').then((m) => ({ default: m.LaporanBriefView }))
+);
+const PengaturanView = lazy(() =>
+  import('./views/PengaturanView').then((m) => ({ default: m.PengaturanView }))
+);
 
 const STORAGE_KEY = 'sim_psu_sidoarjo_projects_v1';
 const ROLE_STORAGE_KEY = 'sim_psu_sidoarjo_role_v1';
@@ -100,7 +124,22 @@ export default function App() {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (
+          Array.isArray(parsed) &&
+          parsed.length > 0 &&
+          parsed.every(
+            (p) =>
+              p &&
+              typeof p.id === 'string' &&
+              Array.isArray(p.stages) &&
+              p.stages.length > 0 &&
+              p.coordinates &&
+              typeof p.coordinates.lat === 'number' &&
+              typeof p.coordinates.lng === 'number'
+          )
+        ) {
+          return parsed;
+        }
       }
     } catch {
       // ignore storage errors
@@ -842,123 +881,133 @@ export default function App() {
             </div>
           )}
 
-          {activeMenu === 'dashboard' && (
-            <DashboardView
-              projects={visibleProjects}
-              role={role}
-              onSelectProjectModule={handleSelectProjectModule}
-            />
-          )}
+          <Suspense
+            fallback={
+              <div className="bg-white border border-slate-200 rounded-xl p-8 text-center text-xs text-slate-500">
+                Memuat modul SIM-PSU Sidoarjo...
+              </div>
+            }
+          >
+            {activeMenu === 'dashboard' && (
+              <DashboardView
+                projects={visibleProjects}
+                role={role}
+                onSelectProjectModule={handleSelectProjectModule}
+              />
+            )}
 
-          {activeMenu === 'perumahan' && (
-            <PerumahanView
-              projects={visibleProjects}
-              role={role}
-              onAddProject={handleAddProject}
-              onChangeStage={handleChangeStage}
-              onSelectProjectModule={handleSelectProjectModule}
-              defaultMaintenanceDays={config.defaultMaintenanceDays}
-            />
-          )}
+            {activeMenu === 'perumahan' && (
+              <PerumahanView
+                projects={visibleProjects}
+                role={role}
+                onAddProject={handleAddProject}
+                onChangeStage={handleChangeStage}
+                onSelectProjectModule={handleSelectProjectModule}
+                defaultMaintenanceDays={config.defaultMaintenanceDays}
+              />
+            )}
 
-          {activeMenu === 'verifikasi-admin' && (
-            <VerifikasiAdminView
-              projects={visibleProjects}
-              selectedProjectId={effectiveSelectedProjectId}
-              onSelectProject={setSelectedProjectId}
-              onChangeStage={handleChangeStage}
-              role={role}
-              onUpdateDocStatus={handleUpdateDocStatus}
-              onIssueBaAdmin={handleIssueBaAdmin}
-            />
-          )}
+            {activeMenu === 'verifikasi-admin' && (
+              <VerifikasiAdminView
+                projects={visibleProjects}
+                selectedProjectId={effectiveSelectedProjectId}
+                onSelectProject={setSelectedProjectId}
+                onChangeStage={handleChangeStage}
+                role={role}
+                onUpdateDocStatus={handleUpdateDocStatus}
+                onIssueBaAdmin={handleIssueBaAdmin}
+              />
+            )}
 
-          {activeMenu === 'survei-fisik' && (
-            <SurveiFisikView
-              projects={visibleProjects}
-              selectedProjectId={effectiveSelectedProjectId}
-              onSelectProject={setSelectedProjectId}
-              onChangeStage={handleChangeStage}
-              role={role}
-              onUpdateMeasurement={handleUpdateMeasurement}
-              onAddSurveyLog={handleAddSurveyLog}
-              onAddDefect={handleAddDefect}
-              onSubmitDefectRepair={handleSubmitDefectRepair}
-              onCloseDefect={handleCloseDefect}
-              onNavigateModule={setActiveMenu}
-              minPhysicalRatioPct={config.minPhysicalRatioPct}
-              maintenanceAlertDays={config.maintenanceAlertDays}
-            />
-          )}
+            {activeMenu === 'survei-fisik' && (
+              <SurveiFisikView
+                projects={visibleProjects}
+                selectedProjectId={effectiveSelectedProjectId}
+                onSelectProject={setSelectedProjectId}
+                onChangeStage={handleChangeStage}
+                role={role}
+                onUpdateMeasurement={handleUpdateMeasurement}
+                onAddSurveyLog={handleAddSurveyLog}
+                onAddDefect={handleAddDefect}
+                onSubmitDefectRepair={handleSubmitDefectRepair}
+                onCloseDefect={handleCloseDefect}
+                onNavigateModule={setActiveMenu}
+                minPhysicalRatioPct={config.minPhysicalRatioPct}
+                maintenanceAlertDays={config.maintenanceAlertDays}
+              />
+            )}
 
-          {activeMenu === 'bast-bmd' && (
-            <BastBmdView
-              projects={visibleProjects}
-              selectedProjectId={effectiveSelectedProjectId}
-              onSelectProject={setSelectedProjectId}
-              onChangeStage={handleChangeStage}
-              role={role}
-              onIssueBapl={handleIssueBapl}
-              onIssueBast={handleIssueBast}
-              onAddBmdAsset={handleAddBmdAsset}
-              minPhysicalRatioPct={config.minPhysicalRatioPct}
-            />
-          )}
+            {activeMenu === 'bast-bmd' && (
+              <BastBmdView
+                projects={visibleProjects}
+                selectedProjectId={effectiveSelectedProjectId}
+                onSelectProject={setSelectedProjectId}
+                onChangeStage={handleChangeStage}
+                role={role}
+                onIssueBapl={handleIssueBapl}
+                onIssueBast={handleIssueBast}
+                onAddBmdAsset={handleAddBmdAsset}
+                minPhysicalRatioPct={config.minPhysicalRatioPct}
+              />
+            )}
 
-          {activeMenu === 'webgis' && (
-            <WebGisView
-              projects={visibleProjects}
-              onSelectProjectModule={handleSelectProjectModule}
-            />
-          )}
+            {activeMenu === 'webgis' && (
+              <WebGisView
+                projects={visibleProjects}
+                onSelectProjectModule={handleSelectProjectModule}
+              />
+            )}
 
-          {activeMenu === 'psu-terlantar' && (
-            <PsuTerlantarView
-              projects={projects}
-              role={role}
-              onAdvanceAbandonedStage={handleAdvanceAbandonedStage}
-              onAddAbandonedProject={handleAddAbandonedProject}
-            />
-          )}
+            {activeMenu === 'psu-terlantar' && (
+              <PsuTerlantarView
+                projects={projects}
+                role={role}
+                onAdvanceAbandonedStage={handleAdvanceAbandonedStage}
+                onAddAbandonedProject={handleAddAbandonedProject}
+              />
+            )}
 
-          {activeMenu === 'analytics' && (
-            <AnalyticsView
-              projects={projects}
-              onNavigateModule={setActiveMenu}
-              onSelectProjectModule={handleSelectProjectModule}
-              minPhysicalRatioPct={config.minPhysicalRatioPct}
-            />
-          )}
+            {activeMenu === 'analytics' && (
+              <AnalyticsView
+                projects={projects}
+                onNavigateModule={setActiveMenu}
+                onSelectProjectModule={handleSelectProjectModule}
+                minPhysicalRatioPct={config.minPhysicalRatioPct}
+              />
+            )}
 
-          {activeMenu === 'laporan-brief' && <LaporanBriefView projects={projects} />}
+            {activeMenu === 'laporan-brief' && <LaporanBriefView projects={projects} />}
 
-          {activeMenu === 'pengaturan' && (
-            <PengaturanView
-              role={role}
-              projects={projects}
-              activeDeveloperName={activeDeveloperName}
-              onChangeActiveDeveloper={(dev) => {
-                setActiveDeveloperName(dev);
-                showToast(
-                  dev === 'ALL'
-                    ? 'Isolasi pengembang menampilkan seluruh proyek simulasi.'
-                    : `Isolasi data pengembang aktif untuk: ${dev}`
-                );
-              }}
-              config={config}
-              onUpdateConfig={handleUpdateConfig}
-              auditLogs={auditLogs}
-              onOpenAuditModal={() => setAuditModalOpen(true)}
-            />
-          )}
+            {activeMenu === 'pengaturan' && (
+              <PengaturanView
+                role={role}
+                projects={projects}
+                activeDeveloperName={activeDeveloperName}
+                onChangeActiveDeveloper={(dev) => {
+                  setActiveDeveloperName(dev);
+                  showToast(
+                    dev === 'ALL'
+                      ? 'Isolasi pengembang menampilkan seluruh proyek simulasi.'
+                      : `Isolasi data pengembang aktif untuk: ${dev}`
+                  );
+                }}
+                config={config}
+                onUpdateConfig={handleUpdateConfig}
+                auditLogs={auditLogs}
+                onOpenAuditModal={() => setAuditModalOpen(true)}
+              />
+            )}
+          </Suspense>
         </main>
       </div>
 
-      <AuditTrailModal
-        isOpen={auditModalOpen}
-        logs={auditLogs}
-        onClose={() => setAuditModalOpen(false)}
-      />
+      <Suspense fallback={null}>
+        <AuditTrailModal
+          isOpen={auditModalOpen}
+          logs={auditLogs}
+          onClose={() => setAuditModalOpen(false)}
+        />
+      </Suspense>
 
       {toast && (
         <div
