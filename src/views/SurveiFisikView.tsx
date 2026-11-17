@@ -72,8 +72,9 @@ export const SurveiFisikView: React.FC<SurveiFisikViewProps> = ({
   const project = projects.find((p) => p.id === selectedProjectId) || projects[0];
   const stage = getActiveStage(project);
 
-  const canInspect = role === 'TIM_LAPANGAN' || role === 'ADMIN_DP2CKTR';
-  const canSubmitRepair = role === 'PENGEMBANG' || role === 'ADMIN_DP2CKTR';
+  const isBastIssued = Boolean(stage.bastNumber);
+  const canInspect = (role === 'TIM_LAPANGAN' || role === 'ADMIN_DP2CKTR') && !isBastIssued;
+  const canSubmitRepair = (role === 'PENGEMBANG' || role === 'ADMIN_DP2CKTR') && !isBastIssued;
 
   const [activeCategory, setActiveCategory] = useState<'ALL' | InfraCategory>('ALL');
 
@@ -345,6 +346,16 @@ export const SurveiFisikView: React.FC<SurveiFisikViewProps> = ({
         </div>
       </div>
 
+      {isBastIssued && (
+        <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-xs text-blue-900 flex items-center gap-2">
+          <Lock className="w-4 h-4 text-[#2563EB] shrink-0" />
+          <span>
+            Data ukur fisik dan defect list terkunci permanen karena{' '}
+            <strong>BAST Akhir ({stage.bastNumber})</strong> sudah diterbitkan.
+          </span>
+        </div>
+      )}
+
       {/* Komparasi Siteplan vs Aktual Lapangan */}
       <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -432,7 +443,7 @@ export const SurveiFisikView: React.FC<SurveiFisikViewProps> = ({
                                 project.id,
                                 project.activeStageIndex,
                                 item.id,
-                                Math.max(0, Number(e.target.value))
+                                Math.max(0, Number(e.target.value) || 0)
                               )
                             }
                             className="w-24 px-2 py-1 text-right font-mono text-xs border border-slate-300 rounded bg-white tabular-nums focus:outline-none focus:border-[#0F294A]"

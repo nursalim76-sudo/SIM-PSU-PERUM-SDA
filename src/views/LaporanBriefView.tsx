@@ -88,6 +88,9 @@ export const LaporanBriefView: React.FC<LaporanBriefViewProps> = ({ projects }) 
     URL.revokeObjectURL(url);
   };
 
+  const ewsKecamatans = Array.from(new Set(ewsList.map((p) => p.kecamatan))).slice(0, 3);
+  const abandonedProjects = projects.filter((p) => Boolean(p.abandonedInfo));
+
   return (
     <div className="space-y-6">
       <div className="no-print flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -184,14 +187,24 @@ export const LaporanBriefView: React.FC<LaporanBriefViewProps> = ({ projects }) 
             <li>
               <strong>Penertiban Pengembang Penunggak:</strong> Terdapat{' '}
               <span className="font-mono font-semibold">{ewsList.length}</span> perumahan dalam daftar
-              prioritas EWS (termasuk kasus menunggak di Kecamatan Candi dan Krian serta defect overdue di Sukodono).
-              Direkomendasikan penerbitan Surat Teguran III dan penahanan persetujuan siteplan lanjutan.
+              prioritas EWS
+              {ewsKecamatans.length > 0
+                ? ` (tersebar di Kec. ${ewsKecamatans.join(', ')})`
+                : ''}
+              . Direkomendasikan penerbitan Surat Teguran III dan penahanan persetujuan siteplan lanjutan.
             </li>
             <li>
-              <strong>Akselerasi Penetapan SK Bupati Jalur Khusus:</strong> Perumahan{' '}
-              <em>Graha Asri Sedati</em> (pengembang pailit, luas PSU 2,56 Ha) telah menyelesaikan
-              Berita Acara Pembuktian Kelalaian dan siap diagendakan untuk penetapan SK Bupati guna
-              penyerahan sepihak Pemkab Sidoarjo.
+              <strong>Akselerasi Penetapan SK Bupati Jalur Khusus:</strong>{' '}
+              {abandonedProjects.length > 0 ? (
+                <>
+                  Tercatat <span className="font-mono font-semibold">{abandonedProjects.length}</span>{' '}
+                  kawasan jalur khusus (antara lain <em>{abandonedProjects[0].namaPerumahan}</em> pada tahap{' '}
+                  <strong>{abandonedProjects[0].abandonedInfo?.currentStage}</strong>) untuk pengamanan
+                  aset sepihak Pemkab Sidoarjo.
+                </>
+              ) : (
+                'Belum ada usulan kawasan jalur khusus PSU terlantar aktif saat ini.'
+              )}
             </li>
             <li>
               <strong>Integrasi KIB BPKAD:</strong> Total nilai aset PSU yang telah resmi tercatat

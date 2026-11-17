@@ -406,6 +406,12 @@ export default function App() {
     actualVolume: number
   ) => {
     if (!guardAction('UPDATE_MEASUREMENT')) return;
+    const safeVolume = Number.isFinite(actualVolume) ? Math.max(0, actualVolume) : 0;
+    const targetProj = projects.find((p) => p.id === projectId);
+    if (targetProj?.stages[stageIndex]?.bastNumber) {
+      showToast('Data ukur fisik terkunci karena BAST Akhir telah diterbitkan.');
+      return;
+    }
     setProjects((prev) =>
       prev.map((p) => {
         if (p.id !== projectId) return p;
@@ -413,12 +419,12 @@ export default function App() {
           if (idx !== stageIndex) return st;
           const nextChecklist = st.physicalChecklist.map((item) => {
             if (item.id !== itemId) return item;
-            const ratioPct = getMeasurementRatio(item.siteplanVolume, actualVolume);
+            const ratioPct = getMeasurementRatio(item.siteplanVolume, safeVolume);
             return {
               ...item,
-              actualVolume,
+              actualVolume: safeVolume,
               condition:
-                actualVolume === 0
+                safeVolume === 0
                   ? ('Belum Diperiksa' as const)
                   : ratioPct < config.minPhysicalRatioPct
                     ? ('Perlu Perbaikan' as const)
@@ -457,6 +463,10 @@ export default function App() {
   const handleAddDefect = (projectId: string, stageIndex: number, defect: DefectItem) => {
     if (!guardAction('ADD_DEFECT')) return;
     const targetProj = projects.find((p) => p.id === projectId);
+    if (targetProj?.stages[stageIndex]?.bastNumber) {
+      showToast('Tidak dapat menambah defect karena BAST Akhir sudah diterbitkan.');
+      return;
+    }
     setProjects((prev) =>
       prev.map((p) => {
         if (p.id !== projectId) return p;
@@ -589,7 +599,7 @@ export default function App() {
       );
       return;
     }
-    if (!targetStage.baAdminNumber && targetProj.status !== 'TERLANTAR_PAILIT') {
+    if (!targetStage.baAdminNumber && !targetProj.abandonedInfo) {
       showToast('BAPL ditolak: BA Penyerahan Administrasi harus terbit terlebih dahulu.');
       return;
     }
@@ -623,8 +633,13 @@ export default function App() {
     if (!targetProj || !targetStage) return;
 
     const openDefects = targetStage.defects.filter((d) => d.status !== 'Closed');
-    if (openDefects.length > 0 || !targetStage.baplNumber) {
-      showToast('BAST Akhir ditolak: pastikan BAPL sudah terbit dan 0 defect berstatus Open.');
+    const lowItems = targetStage.physicalChecklist.filter(
+      (i) => i.actualVolume > 0 && getMeasurementRatio(i.siteplanVolume, i.actualVolume) < config.minPhysicalRatioPct
+    );
+    if (openDefects.length > 0 || lowItems.length > 0 || !targetStage.baplNumber) {
+      showToast(
+        'BAST Akhir ditolak: pastikan BAPL sudah terbit, 0 defect Open, dan rasio fisik memenuhi ambang batas.'
+      );
       return;
     }
 
@@ -723,7 +738,20 @@ export default function App() {
           ...p,
           abandonedInfo: updatedAbandoned,
           status: nextStatus,
-          stages: p.stages.map((st, idx) => (idx === 0 ? { ...st, status: nextStatus } : st)),
+          ewsFlag: nextStage !== 'Pencatatan Aset BMD',
+          stages: p.stages.map((st, idx) =>
+            idx === 0
+              ? {
+                  ...st,
+                  status: nextStatus,
+                  bastNumber:
+                    nextStage === 'Pencatatan Aset BMD'
+                      ? st.bastNumber || updatedAbandoned.skBupatiNumber || '188/418/438.1.1.3/2026'
+                      : st.bastNumber,
+                  bastDate: nextStage === 'Pencatatan Aset BMD' ? st.bastDate || '2026-11-16' : st.bastDate,
+                }
+              : st
+          ),
         };
       })
     );

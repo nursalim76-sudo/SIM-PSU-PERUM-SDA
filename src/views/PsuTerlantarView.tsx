@@ -9,7 +9,7 @@ import {
   UserRole,
 } from '../types/psu';
 import { formatAreaM2, formatDateId } from '../utils/formatters';
-import { makeChecklist } from '../data/initialData';
+import { makeChecklist, SIDOARJO_MAP_POLYGONS } from '../data/initialData';
 
 interface PsuTerlantarViewProps {
   projects: HousingProject[];
@@ -74,7 +74,15 @@ export const PsuTerlantarView: React.FC<PsuTerlantarViewProps> = ({
       ewsFlag: true,
       ewsReason: 'Usulan penyerahan sepihak Pemda — Jalur Khusus PSU Terlantar',
       targetPenyerahanDate: '2027-03-31',
-      coordinates: { lat: -7.535, lng: 112.695, mapX: 355, mapY: 482 },
+      coordinates: (() => {
+        const poly = SIDOARJO_MAP_POLYGONS.find((k) => k.name === form.kecamatan);
+        return {
+          lat: -7.45 + (Math.random() - 0.5) * 0.08,
+          lng: 112.69 + (Math.random() - 0.5) * 0.12,
+          mapX: (poly ? poly.labelX : 355) + Math.round((Math.random() - 0.5) * 20),
+          mapY: (poly ? poly.labelY : 482) + Math.round((Math.random() - 0.5) * 16),
+        };
+      })(),
       estimasiNilaiAsetRp: luasPsu * 1100000,
       abandonedInfo: {
         currentStage: 'Laporan Kecamatan/Warga',
@@ -152,6 +160,11 @@ export const PsuTerlantarView: React.FC<PsuTerlantarViewProps> = ({
 
       {/* Cases List */}
       <div className="space-y-4">
+        {abandonedProjects.length === 0 ? (
+          <div className="bg-white border border-slate-200 rounded-xl p-8 text-center text-xs text-slate-500">
+            Belum ada kasus PSU terlantar / pengembang pailit yang tercatat.
+          </div>
+        ) : null}
         {abandonedProjects.map((project) => {
           if (!project.abandonedInfo) return null;
           const info = project.abandonedInfo;

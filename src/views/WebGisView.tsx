@@ -108,8 +108,9 @@ export const WebGisView: React.FC<WebGisViewProps> = ({ projects, onSelectProjec
 
           <button
             type="button"
+            disabled={filteredProjects.length === 0}
             onClick={handleExportGeoJson}
-            className="px-3 py-2 text-xs font-medium text-[#0F294A] bg-white border border-slate-300 rounded-lg hover:bg-slate-50 whitespace-nowrap cursor-pointer"
+            className="px-3 py-2 text-xs font-medium text-[#0F294A] bg-white border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
           >
             Ekspor GeoJSON
           </button>
@@ -240,7 +241,10 @@ export const WebGisView: React.FC<WebGisViewProps> = ({ projects, onSelectProjec
               {filteredProjects.map((project) => {
                 const meta = getStatusMeta(project.status);
                 const isSelected = selectedProject?.id === project.id;
-                const parcelSize = Math.max(12, Math.min(24, Math.round(Math.sqrt(project.luasWajibPsuM2) / 11)));
+                const parcelSize = Math.max(
+                  12,
+                  Math.min(24, Math.round(Math.sqrt(Math.max(0, project.luasWajibPsuM2)) / 11))
+                );
                 return (
                   <g
                     key={project.id}

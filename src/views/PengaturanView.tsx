@@ -60,7 +60,17 @@ export const PengaturanView: React.FC<PengaturanViewProps> = ({
   const handleSaveConfig = (e: React.FormEvent) => {
     e.preventDefault();
     if (!canConfigure) return;
-    onUpdateConfig(draftCfg);
+    const clamp = (val: number, min: number, max: number, fallback: number) =>
+      Number.isFinite(val) ? Math.min(max, Math.max(min, Math.round(val))) : fallback;
+    const sanitized: SystemConfig = {
+      minPhysicalRatioPct: clamp(draftCfg.minPhysicalRatioPct, 80, 100, DEFAULT_SYSTEM_CONFIG.minPhysicalRatioPct),
+      defaultMaintenanceDays: clamp(draftCfg.defaultMaintenanceDays, 30, 365, DEFAULT_SYSTEM_CONFIG.defaultMaintenanceDays),
+      maintenanceAlertDays: clamp(draftCfg.maintenanceAlertDays, 3, 30, DEFAULT_SYSTEM_CONFIG.maintenanceAlertDays),
+      bmdBacklogMaxDays: clamp(draftCfg.bmdBacklogMaxDays, 3, 60, DEFAULT_SYSTEM_CONFIG.bmdBacklogMaxDays),
+      ewsBuiltThresholdPct: clamp(draftCfg.ewsBuiltThresholdPct, 50, 100, DEFAULT_SYSTEM_CONFIG.ewsBuiltThresholdPct),
+    };
+    setDraftCfg(sanitized);
+    onUpdateConfig(sanitized);
   };
 
   return (

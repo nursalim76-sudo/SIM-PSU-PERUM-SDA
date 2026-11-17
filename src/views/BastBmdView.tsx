@@ -78,7 +78,7 @@ export const BastBmdView: React.FC<BastBmdViewProps> = ({
     (item) => item.actualVolume > 0 && getMeasurementRatio(item.siteplanVolume, item.actualVolume) < minPhysicalRatioPct
   );
   const hasAreaAnomaly = lowAreaItems.length > 0;
-  const hasBaAdmin = Boolean(stage.baAdminNumber) || project.status === 'TERLANTAR_PAILIT';
+  const hasBaAdmin = Boolean(stage.baAdminNumber) || Boolean(project.abandonedInfo);
   const isLocked = !hasBaAdmin || openDefectsCount > 0 || hasAreaAnomaly;
 
   const canIssueBast = role === 'ADMIN_DP2CKTR';
@@ -410,7 +410,7 @@ export const BastBmdView: React.FC<BastBmdViewProps> = ({
                 min={0}
                 value={bmdForm.nilaiPerolehanRp}
                 onChange={(e) =>
-                  setBmdForm({ ...bmdForm, nilaiPerolehanRp: Number(e.target.value) })
+                  setBmdForm({ ...bmdForm, nilaiPerolehanRp: Math.max(0, Number(e.target.value) || 0) })
                 }
                 className="w-full px-3 py-2 text-xs font-mono border border-slate-300 rounded-lg tabular-nums disabled:bg-slate-100"
               />

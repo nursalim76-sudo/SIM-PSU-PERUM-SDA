@@ -17,7 +17,7 @@ import {
   getPhysicalProgress,
 } from '../utils/formatters';
 import { StatusLabel } from '../components/StatusLabel';
-import { makeChecklist } from '../data/initialData';
+import { makeChecklist, SIDOARJO_MAP_POLYGONS } from '../data/initialData';
 
 interface PerumahanViewProps {
   projects: HousingProject[];
@@ -116,6 +116,10 @@ export const PerumahanView: React.FC<PerumahanViewProps> = ({
           ]
         : [buildStage(`${id}-s1`, 'Penyerahan Sekaligus', luasWajibPsuM2, scaleFactor)];
 
+    const kecPoly = SIDOARJO_MAP_POLYGONS.find((k) => k.name === formState.kecamatan);
+    const baseMapX = kecPoly ? kecPoly.labelX : 350;
+    const baseMapY = kecPoly ? kecPoly.labelY : 260;
+
     const newProject: HousingProject = {
       id,
       namaPerumahan: formState.namaPerumahan.trim(),
@@ -136,10 +140,13 @@ export const PerumahanView: React.FC<PerumahanViewProps> = ({
       coordinates: {
         lat: -7.42 + (Math.random() - 0.5) * 0.08,
         lng: 112.7 + (Math.random() - 0.5) * 0.12,
-        mapX: 350 + Math.round((Math.random() - 0.5) * 160),
-        mapY: 260 + Math.round((Math.random() - 0.5) * 140),
+        mapX: baseMapX + Math.round((Math.random() - 0.5) * 24),
+        mapY: baseMapY + Math.round((Math.random() - 0.5) * 20),
       },
-      estimasiNilaiAsetRp: Number(formState.estimasiNilaiAsetRp),
+      estimasiNilaiAsetRp:
+        Number(formState.estimasiNilaiAsetRp) > 0
+          ? Number(formState.estimasiNilaiAsetRp)
+          : Math.round(luasWajibPsuM2 * 1450000),
     };
 
     onAddProject(newProject);

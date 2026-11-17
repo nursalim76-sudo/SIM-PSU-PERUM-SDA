@@ -351,13 +351,20 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 text-xs">
-              {ewsProjects.map((project) => {
-                const targetMenu: MenuId =
-                  project.status === 'TERLANTAR_PAILIT'
-                    ? 'psu-terlantar'
-                    : project.status === 'PERBAIKAN_DEFECT'
-                      ? 'survei-fisik'
-                      : 'verifikasi-admin';
+              {ewsProjects.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-8 text-center text-slate-500">
+                    Seluruh kawasan perumahan dalam pantauan saat ini berada dalam kondisi aman (0 peringatan EWS aktif).
+                  </td>
+                </tr>
+              ) : (
+                ewsProjects.map((project) => {
+                  const targetMenu: MenuId =
+                    project.status === 'TERLANTAR_PAILIT'
+                      ? 'psu-terlantar'
+                      : project.status === 'PERBAIKAN_DEFECT'
+                        ? 'survei-fisik'
+                        : 'verifikasi-admin';
 
                 return (
                   <tr key={project.id} className="hover:bg-slate-50/80 transition-colors">
@@ -393,8 +400,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                       </div>
                     </td>
                   </tr>
-                );
-              })}
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>
