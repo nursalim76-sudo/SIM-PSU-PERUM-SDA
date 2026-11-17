@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BookOpen, Check, History, Lock, Save, Shield, Sliders } from 'lucide-react';
 import {
   AuditLogEntry,
@@ -49,6 +49,10 @@ export const PengaturanView: React.FC<PengaturanViewProps> = ({
 }) => {
   const [draftCfg, setDraftCfg] = useState<SystemConfig>(config);
   const [activeTab, setActiveTab] = useState<'RBAC' | 'SLA' | 'SOP'>('RBAC');
+
+  useEffect(() => {
+    setDraftCfg(config);
+  }, [config]);
 
   const canConfigure = canPerformAction(role, 'CONFIGURE_SYSTEM');
   const developerOptions = Array.from(new Set(projects.map((p) => p.pengembang)));

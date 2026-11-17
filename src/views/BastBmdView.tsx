@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   CheckCircle2,
   Download,
@@ -35,6 +35,7 @@ interface BastBmdViewProps {
   onIssueBapl: (projectId: string, stageIndex: number, baplNumber: string, baplDate: string) => void;
   onIssueBast: (projectId: string, stageIndex: number, bastNumber: string, bastDate: string) => void;
   onAddBmdAsset: (projectId: string, stageIndex: number, record: BmdAssetRecord) => void;
+  minPhysicalRatioPct?: number;
 }
 
 export const BastBmdView: React.FC<BastBmdViewProps> = ({
@@ -46,24 +47,35 @@ export const BastBmdView: React.FC<BastBmdViewProps> = ({
   onIssueBapl,
   onIssueBast,
   onAddBmdAsset,
+  minPhysicalRatioPct = 95,
 }) => {
   const project = projects.find((p) => p.id === selectedProjectId) || projects[0];
   const stage = getActiveStage(project);
-  const projectIdx = projects.findIndex((p) => p.id === project.id);
+  const projectIdx = Math.max(0, projects.findIndex((p) => p.id === project.id));
 
   const [previewDoc, setPreviewDoc] = useState<DocPreviewType | null>(null);
   const [bmdForm, setBmdForm] = useState({
     kodeBarangBmd: '1.3.1.01.01.04.021',
     jenisKib: 'KIB A - Tanah' as KibType,
-    nomorRegister: `REG-3515-2026-0${120 + projectIdx}`,
-    nomorSertifikatHakPakai: `HP No. 00${250 + projectIdx}/${project.desa}/2026`,
+    nomorRegister: `REG-3515-2026-${String(120 + projectIdx * 10 + stage.bmdAssets.length + 1).padStart(4, '0')}`,
+    nomorSertifikatHakPakai: `HP No. ${String(250 + projectIdx * 10 + stage.bmdAssets.length + 1).padStart(4, '0')}/${project.desa}/2026`,
     nilaiPerolehanRp: Math.round(project.estimasiNilaiAsetRp * 0.65),
     opdPengelolaTeknis: OPD_PENGELOLA_OPTIONS[0],
   });
 
+  useEffect(() => {
+    const seq = 120 + projectIdx * 10 + stage.bmdAssets.length + 1;
+    setBmdForm((prev) => ({
+      ...prev,
+      nomorRegister: `REG-3515-2026-${String(seq).padStart(4, '0')}`,
+      nomorSertifikatHakPakai: `HP No. ${String(250 + projectIdx * 10 + stage.bmdAssets.length + 1).padStart(4, '0')}/${project.desa}/2026`,
+      nilaiPerolehanRp: Math.round(project.estimasiNilaiAsetRp * 0.65),
+    }));
+  }, [project.id, stage.id, stage.bmdAssets.length, projectIdx, project.desa, project.estimasiNilaiAsetRp]);
+
   const openDefectsCount = stage.defects.filter((d) => d.status !== 'Closed').length;
   const lowAreaItems = stage.physicalChecklist.filter(
-    (item) => item.actualVolume > 0 && getMeasurementRatio(item.siteplanVolume, item.actualVolume) < 95
+    (item) => item.actualVolume > 0 && getMeasurementRatio(item.siteplanVolume, item.actualVolume) < minPhysicalRatioPct
   );
   const hasAreaAnomaly = lowAreaItems.length > 0;
   const hasBaAdmin = Boolean(stage.baAdminNumber) || project.status === 'TERLANTAR_PAILIT';
@@ -293,7 +305,7 @@ export const BastBmdView: React.FC<BastBmdViewProps> = ({
           <p className="text-xs text-slate-600 mt-4 pt-3 border-t border-slate-200">
             {isLocked
               ? hasAreaAnomaly
-                ? `Penerbitan BAPL/BAST ditahan: terdapat ${lowAreaItems.length} komponen fisik PSU dengan realisasi <95% dari siteplan.`
+                ? `Penerbitan BAPL/BAST ditahan: terdapat ${lowAreaItems.length} komponen fisik PSU dengan realisasi <${minPhysicalRatioPct}% dari siteplan.`
                 : 'Penerbitan BAPL/BAST saat ini terkunci karena BA Administrasi belum terbit atau masih ada defect berstatus Open.'
               : !canIssueBast
                 ? 'Hanya Admin Sekretariat PSU (DP2CKTR) yang berwenang menerbitkan BAPL dan BAST Akhir.'

@@ -17,6 +17,7 @@ import {
   getPhysicalProgress,
 } from '../utils/formatters';
 import { StatusLabel } from '../components/StatusLabel';
+import { makeChecklist } from '../data/initialData';
 
 interface PerumahanViewProps {
   projects: HousingProject[];
@@ -24,6 +25,7 @@ interface PerumahanViewProps {
   onAddProject: (project: HousingProject) => void;
   onChangeStage: (projectId: string, stageIndex: number) => void;
   onSelectProjectModule: (projectId: string, menu: MenuId) => void;
+  defaultMaintenanceDays?: number;
 }
 
 export const PerumahanView: React.FC<PerumahanViewProps> = ({
@@ -32,6 +34,7 @@ export const PerumahanView: React.FC<PerumahanViewProps> = ({
   onAddProject,
   onChangeStage,
   onSelectProjectModule,
+  defaultMaintenanceDays = 180,
 }) => {
   const [search, setSearch] = useState('');
   const [kecFilter, setKecFilter] = useState<string>('ALL');
@@ -71,17 +74,15 @@ export const PerumahanView: React.FC<PerumahanViewProps> = ({
     e.preventDefault();
     if (!formState.namaPerumahan.trim() || !formState.pengembang.trim()) return;
 
-    const luasWajibPsuM2 = Math.max(0, formState.luasTotalM2 - formState.luasKavlingEfektifM2);
+    const luasTotal = Math.max(1000, Number(formState.luasTotalM2) || 1000);
+    const luasKavling = Math.min(luasTotal, Math.max(0, Number(formState.luasKavlingEfektifM2) || 0));
+    const luasWajibPsuM2 = Math.max(0, luasTotal - luasKavling);
     const id = `prj-${Date.now()}`;
-    const baseChecklist = projects[0].stages[0].physicalChecklist.map((item) => ({
-      ...item,
-      actualVolume: 0,
-      condition: 'Belum Diperiksa' as const,
-    }));
+    const scaleFactor = Math.max(0.5, luasWajibPsuM2 / 24000);
 
-    const buildStage = (stageId: string, name: string, psuArea: number) => ({
+    const buildStage = (stageId: string, name: string, psuArea: number, stageScale: number) => ({
       id: stageId,
-      stageName: name,
+      stageName: name.trim() || 'Tahap Penyerahan',
       luasPsuM2: psuArea,
       status: 'PROSES_ADMIN' as ProjectStatus,
       adminDocs: ADMIN_DOC_TEMPLATES.map((t) => ({
@@ -90,8 +91,8 @@ export const PerumahanView: React.FC<PerumahanViewProps> = ({
         fileName: t.code === 4 ? 'siteplan_pengesahan.pdf' : undefined,
         uploadedAt: t.code === 4 ? '2026-11-16' : undefined,
       })),
-      maintenanceDaysTotal: 180,
-      physicalChecklist: baseChecklist,
+      maintenanceDaysTotal: defaultMaintenanceDays,
+      physicalChecklist: makeChecklist(stageScale, 0, false),
       defects: [],
       surveyLogs: [],
       bmdAssets: [],
@@ -100,10 +101,20 @@ export const PerumahanView: React.FC<PerumahanViewProps> = ({
     const stages =
       formState.skemaPenyerahan === 'Bertahap per Klaster/Blok'
         ? [
-            buildStage(`${id}-s1`, formState.namaTahap1, Math.round(luasWajibPsuM2 * 0.5)),
-            buildStage(`${id}-s2`, formState.namaTahap2, Math.round(luasWajibPsuM2 * 0.5)),
+            buildStage(
+              `${id}-s1`,
+              formState.namaTahap1 || 'Tahap 1 — Klaster Utama',
+              Math.round(luasWajibPsuM2 * 0.5),
+              scaleFactor * 0.5
+            ),
+            buildStage(
+              `${id}-s2`,
+              formState.namaTahap2 || 'Tahap 2 — Klaster Pengembangan',
+              luasWajibPsuM2 - Math.round(luasWajibPsuM2 * 0.5),
+              scaleFactor * 0.5
+            ),
           ]
-        : [buildStage(`${id}-s1`, 'Penyerahan Sekaligus', luasWajibPsuM2)];
+        : [buildStage(`${id}-s1`, 'Penyerahan Sekaligus', luasWajibPsuM2, scaleFactor)];
 
     const newProject: HousingProject = {
       id,
@@ -113,8 +124,8 @@ export const PerumahanView: React.FC<PerumahanViewProps> = ({
       desa: formState.desa.trim() || 'Kota',
       nomorSiteplan: formState.nomorSiteplan.trim() || `650/NEW/SP/438.5.4/2026`,
       tanggalPengesahanSiteplan: formState.tanggalPengesahanSiteplan,
-      luasTotalM2: Number(formState.luasTotalM2),
-      luasKavlingEfektifM2: Number(formState.luasKavlingEfektifM2),
+      luasTotalM2: luasTotal,
+      luasKavlingEfektifM2: luasKavling,
       luasWajibPsuM2,
       skemaPenyerahan: formState.skemaPenyerahan,
       activeStageIndex: 0,
@@ -232,7 +243,10 @@ export const PerumahanView: React.FC<PerumahanViewProps> = ({
                   const stage = getActiveStage(project);
                   const adminPct = getAdminProgress(stage);
                   const physPct = getPhysicalProgress(stage);
-                  const psuRatioPct = Math.round((project.luasWajibPsuM2 / project.luasTotalM2) * 100);
+                  const psuRatioPct =
+                    project.luasTotalM2 > 0
+                      ? Math.round((project.luasWajibPsuM2 / project.luasTotalM2) * 100)
+                      : 0;
 
                   return (
                     <tr key={project.id} className="hover:bg-slate-50/70 align-top">
@@ -504,6 +518,33 @@ export const PerumahanView: React.FC<PerumahanViewProps> = ({
                     <option value="Bertahap per Klaster/Blok">Bertahap per Klaster/Blok</option>
                   </select>
                 </div>
+
+                {formState.skemaPenyerahan === 'Bertahap per Klaster/Blok' && (
+                  <>
+                    <div>
+                      <label className="block text-xs font-medium text-slate-700 mb-1">
+                        Nama Tahap 1 (Klaster/Blok)
+                      </label>
+                      <input
+                        type="text"
+                        value={formState.namaTahap1}
+                        onChange={(e) => setFormState({ ...formState, namaTahap1: e.target.value })}
+                        className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-slate-700 mb-1">
+                        Nama Tahap 2 (Klaster/Blok)
+                      </label>
+                      <input
+                        type="text"
+                        value={formState.namaTahap2}
+                        onChange={(e) => setFormState({ ...formState, namaTahap2: e.target.value })}
+                        className="w-full px-3 py-2 text-xs border border-slate-300 rounded-lg"
+                      />
+                    </div>
+                  </>
+                )}
               </div>
 
               <div className="flex items-center justify-end gap-2 pt-4 border-t border-slate-200">

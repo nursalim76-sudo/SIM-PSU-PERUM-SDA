@@ -63,7 +63,6 @@ export const WebGisView: React.FC<WebGisViewProps> = ({ projects, onSelectProjec
 
   const selectedProject =
     filteredProjects.find((p) => p.id === selectedProjectId) ||
-    projects.find((p) => p.id === selectedProjectId) ||
     filteredProjects[0] ||
     null;
 

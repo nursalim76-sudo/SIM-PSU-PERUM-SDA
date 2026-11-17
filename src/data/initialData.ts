@@ -23,7 +23,7 @@ function makeDocs(statuses: Array<'Valid' | 'Perlu Revisi' | 'Menunggu Verifikas
   });
 }
 
-function makeChecklist(
+export function makeChecklist(
   scaleFactor: number,
   actualRatio: number,
   checked = true,

@@ -122,12 +122,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <>
-      <aside className="hidden lg:block w-[264px] shrink-0 border-r border-slate-200 min-h-screen">
+      <aside className="no-print hidden lg:block w-[264px] shrink-0 border-r border-slate-200 min-h-screen">
         <div className="sticky top-0 h-screen">{navContent}</div>
       </aside>
 
       {mobileOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden flex">
+        <div className="no-print fixed inset-0 z-40 lg:hidden flex">
           <div className="fixed inset-0 bg-slate-900/50" onClick={onCloseMobile} />
           <aside className="relative z-50 w-[272px] max-w-[82vw] h-full shadow-xl">
             {navContent}

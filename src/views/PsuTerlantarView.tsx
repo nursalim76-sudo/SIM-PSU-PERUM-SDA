@@ -9,6 +9,7 @@ import {
   UserRole,
 } from '../types/psu';
 import { formatAreaM2, formatDateId } from '../utils/formatters';
+import { makeChecklist } from '../data/initialData';
 
 interface PsuTerlantarViewProps {
   projects: HousingProject[];
@@ -49,9 +50,10 @@ export const PsuTerlantarView: React.FC<PsuTerlantarViewProps> = ({
     e.preventDefault();
     if (!form.namaPerumahan.trim()) return;
     const id = `prj-ab-${Date.now()}`;
-    const baseChecklist = projects[0].stages[0].physicalChecklist.map((i) => ({
+    const luasPsu = Math.max(500, Number(form.luasWajibPsuM2) || 14500);
+    const scaleFactor = Math.max(0.5, luasPsu / 24000);
+    const baseChecklist = makeChecklist(scaleFactor, 0.95, true).map((i) => ({
       ...i,
-      actualVolume: i.siteplanVolume,
       condition: 'Perlu Perbaikan' as const,
     }));
 
@@ -63,9 +65,9 @@ export const PsuTerlantarView: React.FC<PsuTerlantarViewProps> = ({
       desa: form.desa.trim() || 'Kota',
       nomorSiteplan: '650/EX-PAILIT/438.5.4/2018',
       tanggalPengesahanSiteplan: '2018-04-10',
-      luasTotalM2: Math.round(form.luasWajibPsuM2 * 2.5),
-      luasKavlingEfektifM2: Math.round(form.luasWajibPsuM2 * 1.5),
-      luasWajibPsuM2: Number(form.luasWajibPsuM2),
+      luasTotalM2: Math.round(luasPsu * 2.5),
+      luasKavlingEfektifM2: Math.round(luasPsu * 1.5),
+      luasWajibPsuM2: luasPsu,
       skemaPenyerahan: 'Sekaligus',
       activeStageIndex: 0,
       status: 'TERLANTAR_PAILIT',
@@ -73,7 +75,7 @@ export const PsuTerlantarView: React.FC<PsuTerlantarViewProps> = ({
       ewsReason: 'Usulan penyerahan sepihak Pemda — Jalur Khusus PSU Terlantar',
       targetPenyerahanDate: '2027-03-31',
       coordinates: { lat: -7.535, lng: 112.695, mapX: 355, mapY: 482 },
-      estimasiNilaiAsetRp: Number(form.luasWajibPsuM2) * 1100000,
+      estimasiNilaiAsetRp: luasPsu * 1100000,
       abandonedInfo: {
         currentStage: 'Laporan Kecamatan/Warga',
         reason:
@@ -86,7 +88,7 @@ export const PsuTerlantarView: React.FC<PsuTerlantarViewProps> = ({
         {
           id: `${id}-s1`,
           stageName: 'Jalur Khusus PSU Terlantar',
-          luasPsuM2: Number(form.luasWajibPsuM2),
+          luasPsuM2: luasPsu,
           status: 'TERLANTAR_PAILIT',
           adminDocs: ADMIN_DOC_TEMPLATES.map((t) => ({ ...t, status: 'Menunggu Verifikasi' })),
           maintenanceDaysTotal: 0,
@@ -151,7 +153,8 @@ export const PsuTerlantarView: React.FC<PsuTerlantarViewProps> = ({
       {/* Cases List */}
       <div className="space-y-4">
         {abandonedProjects.map((project) => {
-          const info = project.abandonedInfo!;
+          if (!project.abandonedInfo) return null;
+          const info = project.abandonedInfo;
           const stageIdx = ABANDONED_STAGES.indexOf(info.currentStage);
           const nextStage =
             stageIdx >= 0 && stageIdx < ABANDONED_STAGES.length - 1

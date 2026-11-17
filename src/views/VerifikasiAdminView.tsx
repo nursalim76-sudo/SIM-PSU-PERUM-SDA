@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   CheckCircle2,
   FileCheck2,
@@ -53,6 +53,11 @@ export const VerifikasiAdminView: React.FC<VerifikasiAdminViewProps> = ({
   const [activeRevisionDocId, setActiveRevisionDocId] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
+  useEffect(() => {
+    setActiveRevisionDocId(null);
+  }, [project.id, stage.id]);
+
+  const isBaIssued = Boolean(stage.baAdminNumber);
   const canVerify = role === 'ADMIN_DP2CKTR' || role === 'TIM_ADMIN';
   const canUpload = role === 'PENGEMBANG' || role === 'ADMIN_DP2CKTR';
 
@@ -166,8 +171,15 @@ export const VerifikasiAdminView: React.FC<VerifikasiAdminViewProps> = ({
         </div>
       </div>
 
-      {/* Role notice */}
-      {!canVerify && (
+      {/* Role & lock notice */}
+      {isBaIssued ? (
+        <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-xs text-blue-900 flex items-center gap-2">
+          <Lock className="w-4 h-4 text-[#2563EB] shrink-0" />
+          <span>
+            Berkas administrasi telah terkunci permanen karena <strong>BA Penyerahan Administrasi ({stage.baAdminNumber})</strong> sudah diterbitkan.
+          </span>
+        </div>
+      ) : !canVerify ? (
         <div className="bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 text-xs text-slate-700 flex items-center justify-between gap-3">
           <span>
             {role === 'PENGEMBANG'
@@ -175,7 +187,7 @@ export const VerifikasiAdminView: React.FC<VerifikasiAdminViewProps> = ({
               : 'Mode Baca: Persetujuan validasi dokumen & penerbitan BA Penyerahan Administrasi hanya dapat dilakukan oleh Admin Sekretariat PSU (DP2CKTR).'}
           </span>
         </div>
-      )}
+      ) : null}
 
       {/* Checklist 6 Dokumen Permendagri No. 15 Tahun 2026 */}
       <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
@@ -295,7 +307,7 @@ export const VerifikasiAdminView: React.FC<VerifikasiAdminViewProps> = ({
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2 shrink-0">
-                    {canUpload && doc.status !== 'Valid' && (
+                    {canUpload && !isBaIssued && doc.status !== 'Valid' && (
                       <button
                         type="button"
                         onClick={() => handleDeveloperUpload(doc.id, doc.code)}
@@ -306,7 +318,7 @@ export const VerifikasiAdminView: React.FC<VerifikasiAdminViewProps> = ({
                       </button>
                     )}
 
-                    {canVerify && (
+                    {canVerify && !isBaIssued && (
                       <>
                         <button
                           type="button"

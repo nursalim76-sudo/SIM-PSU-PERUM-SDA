@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   AbandonedStage,
   AuditLogEntry,
@@ -149,6 +149,7 @@ export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [auditModalOpen, setAuditModalOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const toastTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     try {
@@ -199,8 +200,12 @@ export default function App() {
 
   const showToast = (msg: string) => {
     setToast(msg);
-    setTimeout(() => {
-      setToast((prev) => (prev === msg ? null : prev));
+    if (toastTimerRef.current) {
+      window.clearTimeout(toastTimerRef.current);
+    }
+    toastTimerRef.current = window.setTimeout(() => {
+      setToast(null);
+      toastTimerRef.current = null;
     }, 3200);
   };
 
@@ -240,10 +245,18 @@ export default function App() {
     setProjects(INITIAL_PROJECTS);
     setAuditLogs(INITIAL_AUDIT_LOGS);
     setConfig(DEFAULT_SYSTEM_CONFIG);
+    setActiveDeveloperName('ALL');
     setSelectedProjectId(INITIAL_PROJECTS[0].id);
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem(AUDIT_STORAGE_KEY);
-    localStorage.removeItem(CONFIG_STORAGE_KEY);
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(AUDIT_STORAGE_KEY);
+      localStorage.removeItem(CONFIG_STORAGE_KEY);
+      Object.keys(localStorage)
+        .filter((k) => k.startsWith('sim_psu_draft_'))
+        .forEach((k) => localStorage.removeItem(k));
+    } catch {
+      // ignore
+    }
     showToast('Data simulasi SIM-PSU Sidoarjo berhasil dikembalikan ke kondisi awal.');
   };
 
@@ -287,7 +300,12 @@ export default function App() {
     if (!guardAction(actionNeeded)) return;
 
     const targetProj = projects.find((p) => p.id === projectId);
-    const targetDoc = targetProj?.stages[stageIndex]?.adminDocs.find((d) => d.id === docId);
+    const targetStage = targetProj?.stages[stageIndex];
+    if (targetStage?.baAdminNumber) {
+      showToast('Dokumen administrasi terkunci karena BA Penyerahan Administrasi sudah diterbitkan.');
+      return;
+    }
+    const targetDoc = targetStage?.adminDocs.find((d) => d.id === docId);
 
     setProjects((prev) =>
       prev.map((p) => {
@@ -315,7 +333,12 @@ export default function App() {
           return { ...st, adminDocs: nextDocs, status: nextStageStatus };
         });
         const updated = { ...p, stages: nextStages };
-        return { ...updated, status: computeOverallProjectStatus(updated), ewsFlag: false };
+        const hasOpenDefects = nextStages.some((st) => st.defects.some((d) => d.status !== 'Closed'));
+        return {
+          ...updated,
+          status: computeOverallProjectStatus(updated),
+          ewsFlag: hasOpenDefects || status === 'Perlu Revisi',
+        };
       })
     );
 
@@ -746,7 +769,7 @@ export default function App() {
   const abandonedCount = projects.filter((p) => p.status === 'TERLANTAR_PAILIT').length;
 
   return (
-    <div className="min-h-screen flex bg-slate-50 text-slate-900">
+    <div id="app-shell-wrapper" className="min-h-screen flex bg-slate-50 text-slate-900">
       <Sidebar
         activeMenu={activeMenu}
         onSelectMenu={setActiveMenu}
@@ -806,6 +829,7 @@ export default function App() {
               onAddProject={handleAddProject}
               onChangeStage={handleChangeStage}
               onSelectProjectModule={handleSelectProjectModule}
+              defaultMaintenanceDays={config.defaultMaintenanceDays}
             />
           )}
 
@@ -834,6 +858,8 @@ export default function App() {
               onSubmitDefectRepair={handleSubmitDefectRepair}
               onCloseDefect={handleCloseDefect}
               onNavigateModule={setActiveMenu}
+              minPhysicalRatioPct={config.minPhysicalRatioPct}
+              maintenanceAlertDays={config.maintenanceAlertDays}
             />
           )}
 
@@ -847,6 +873,7 @@ export default function App() {
               onIssueBapl={handleIssueBapl}
               onIssueBast={handleIssueBast}
               onAddBmdAsset={handleAddBmdAsset}
+              minPhysicalRatioPct={config.minPhysicalRatioPct}
             />
           )}
 
@@ -871,6 +898,7 @@ export default function App() {
               projects={projects}
               onNavigateModule={setActiveMenu}
               onSelectProjectModule={handleSelectProjectModule}
+              minPhysicalRatioPct={config.minPhysicalRatioPct}
             />
           )}
 

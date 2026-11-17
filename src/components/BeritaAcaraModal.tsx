@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Printer, Download, X, ShieldCheck } from 'lucide-react';
 import { HousingProject, HousingStage } from '../types/psu';
 import { formatAreaM2, formatDateId, formatRupiah } from '../utils/formatters';
@@ -25,6 +26,14 @@ export const BeritaAcaraModal: React.FC<BeritaAcaraModalProps> = ({
   docDate,
   onClose,
 }) => {
+  useEffect(() => {
+    if (!isOpen) return;
+    document.body.classList.add('modal-print-active');
+    return () => {
+      document.body.classList.remove('modal-print-active');
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const titleMap: Record<DocPreviewType, string> = {
@@ -46,14 +55,14 @@ export const BeritaAcaraModal: React.FC<BeritaAcaraModalProps> = ({
     URL.revokeObjectURL(url);
   };
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 overflow-y-auto"
+      className="ba-print-overlay fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 overflow-y-auto"
       role="dialog"
       aria-modal="true"
       aria-label="Pratinjau Dokumen Resmi"
     >
-      <div className="bg-white border border-slate-200 rounded-xl shadow-xl w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden">
+      <div className="ba-print-dialog bg-white border border-slate-200 rounded-xl shadow-xl w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden">
         <div className="no-print flex items-center justify-between gap-4 px-6 py-4 border-b border-slate-200 bg-slate-50">
           <div className="flex items-center gap-2.5 min-w-0">
             <ShieldCheck className="w-5 h-5 text-[#0D6E5B] shrink-0" />
@@ -284,6 +293,7 @@ export const BeritaAcaraModal: React.FC<BeritaAcaraModalProps> = ({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

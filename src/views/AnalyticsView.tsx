@@ -14,12 +14,14 @@ interface AnalyticsViewProps {
   projects: HousingProject[];
   onNavigateModule: (menu: MenuId) => void;
   onSelectProjectModule?: (projectId: string, menu: MenuId) => void;
+  minPhysicalRatioPct?: number;
 }
 
 export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
   projects,
   onNavigateModule,
   onSelectProjectModule,
+  minPhysicalRatioPct = 95,
 }) => {
   const insight = useMemo(() => {
     const totalPsuM2 = projects.reduce((acc, p) => acc + p.luasWajibPsuM2, 0);
@@ -73,18 +75,18 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
       0
     );
 
-    // Anomaly Detection (PRD Section 6): <95% physical ratio OR PSU proportion <35%
+    // Anomaly Detection (PRD Section 6): <minPhysicalRatioPct% physical ratio OR PSU proportion <35%
     const anomalies = projects
       .map((p) => {
         const st = getActiveStage(p);
         const lowItems = st.physicalChecklist.filter(
-          (i) => i.actualVolume > 0 && getMeasurementRatio(i.siteplanVolume, i.actualVolume) < 95
+          (i) => i.actualVolume > 0 && getMeasurementRatio(i.siteplanVolume, i.actualVolume) < minPhysicalRatioPct
         );
         const psuPct = p.luasTotalM2 > 0 ? Math.round((p.luasWajibPsuM2 / p.luasTotalM2) * 100) : 0;
         const bmdBacklog = Boolean(st.bastNumber) && st.bmdAssets.length === 0;
         const reasons: string[] = [];
         if (lowItems.length > 0) {
-          reasons.push(`${lowItems.length} komponen PSU aktual <95% dari siteplan`);
+          reasons.push(`${lowItems.length} komponen PSU aktual <${minPhysicalRatioPct}% dari siteplan`);
         }
         if (psuPct < 35) {
           reasons.push(`Proporsi PSU ${psuPct}% di bawah rekomendasi tata ruang 35-40%`);
@@ -141,7 +143,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
       prioritizedQueue,
       unrealizedValueRp,
     };
-  }, [projects]);
+  }, [projects, minPhysicalRatioPct]);
 
   return (
     <div className="space-y-6">
@@ -314,7 +316,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = ({
                 Anomaly & Discrepancy Detection
               </h3>
               <p className="text-xs text-slate-500">
-                Deteksi otomatis selisih luas &lt;95% atau backlog pencatatan BMD
+                Deteksi otomatis selisih luas &lt;{minPhysicalRatioPct}% atau backlog pencatatan BMD
               </p>
             </div>
           </div>

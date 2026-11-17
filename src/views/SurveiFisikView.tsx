@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   AlertTriangle,
   Camera,
@@ -50,6 +50,8 @@ interface SurveiFisikViewProps {
   ) => void;
   onCloseDefect: (projectId: string, stageIndex: number, defectId: string) => void;
   onNavigateModule: (menu: MenuId) => void;
+  minPhysicalRatioPct?: number;
+  maintenanceAlertDays?: number;
 }
 
 export const SurveiFisikView: React.FC<SurveiFisikViewProps> = ({
@@ -64,6 +66,8 @@ export const SurveiFisikView: React.FC<SurveiFisikViewProps> = ({
   onSubmitDefectRepair,
   onCloseDefect,
   onNavigateModule,
+  minPhysicalRatioPct = 95,
+  maintenanceAlertDays = 14,
 }) => {
   const project = projects.find((p) => p.id === selectedProjectId) || projects[0];
   const stage = getActiveStage(project);
@@ -101,6 +105,19 @@ export const SurveiFisikView: React.FC<SurveiFisikViewProps> = ({
     }
   });
 
+  useEffect(() => {
+    setGpsLat(project.coordinates.lat.toFixed(6));
+    setGpsLng(project.coordinates.lng.toFixed(6));
+    setGpsTime('Siap diambil');
+    setShowDefectForm(false);
+    setActiveRepairId(null);
+    try {
+      setOfflineSavedAt(localStorage.getItem(`sim_psu_draft_${project.id}_${stage.id}`));
+    } catch {
+      setOfflineSavedAt(null);
+    }
+  }, [project.id, stage.id, project.coordinates.lat, project.coordinates.lng]);
+
   const handleSaveOfflineDraft = () => {
     const stamp = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
     const val = `Tersimpan lokal (${stamp} WIB)`;
@@ -122,7 +139,7 @@ export const SurveiFisikView: React.FC<SurveiFisikViewProps> = ({
       : stage.physicalChecklist.filter((i) => i.category === activeCategory);
 
   const lowRatioCount = stage.physicalChecklist.filter(
-    (i) => i.actualVolume > 0 && getMeasurementRatio(i.siteplanVolume, i.actualVolume) < 95
+    (i) => i.actualVolume > 0 && getMeasurementRatio(i.siteplanVolume, i.actualVolume) < minPhysicalRatioPct
   ).length;
 
   const handleCaptureGps = () => {
@@ -203,6 +220,11 @@ export const SurveiFisikView: React.FC<SurveiFisikViewProps> = ({
       note,
       SURVEY_PHOTOS.jalan
     );
+    setRepairNotes((prev) => {
+      const next = { ...prev };
+      delete next[defectId];
+      return next;
+    });
     setActiveRepairId(null);
   };
 
@@ -258,7 +280,7 @@ export const SurveiFisikView: React.FC<SurveiFisikViewProps> = ({
             <div className="flex items-center justify-between gap-2 mb-2">
               <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-800">
                 <Clock className="w-4 h-4 text-[#2563EB]" />
-                Countdown Masa Pemeliharaan Fisik (180 Hari)
+                Countdown Masa Pemeliharaan Fisik ({countdown.totalDays} Hari)
               </span>
               <span className="font-mono text-xs font-semibold text-[#2563EB] tabular-nums">
                 {countdown.active
@@ -279,9 +301,9 @@ export const SurveiFisikView: React.FC<SurveiFisikViewProps> = ({
                 ? `Mulai: ${formatDateId(stage.maintenanceStartDate)} · Berjalan ${countdown.daysElapsed} / ${countdown.totalDays} hari`
                 : 'Countdown otomatis aktif setelah BA Penyerahan Administrasi diterbitkan.'}
             </p>
-            {countdown.active && countdown.daysRemaining <= 14 && (
+            {countdown.active && countdown.daysRemaining <= maintenanceAlertDays && (
               <p className="text-[11px] font-semibold text-[#D97706] mt-1">
-                Pengingat SLA H-14: Masa pemeliharaan segera/telah berakhir — jadwalkan pemeriksaan akhir BAPL/BAST.
+                Pengingat SLA H-{maintenanceAlertDays}: Masa pemeliharaan segera/telah berakhir — jadwalkan pemeriksaan akhir BAPL/BAST.
               </p>
             )}
           </div>
@@ -331,7 +353,7 @@ export const SurveiFisikView: React.FC<SurveiFisikViewProps> = ({
               Komparasi Teknis PSU: Siteplan vs Hasil Ukur Aktual Lapangan
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
-              Mengacu 3 kategori Permendagri 15/2026 (Prasarana, Sarana, Utilitas). Peringatan otomatis muncul jika capaian &lt;95%.
+              Mengacu 3 kategori Permendagri 15/2026 (Prasarana, Sarana, Utilitas). Peringatan otomatis muncul jika capaian &lt;{minPhysicalRatioPct}%.
             </p>
           </div>
 
@@ -368,7 +390,7 @@ export const SurveiFisikView: React.FC<SurveiFisikViewProps> = ({
           <div className="px-5 py-2.5 bg-amber-50 border-b border-amber-200 text-xs text-amber-900 flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 text-[#D97706] shrink-0" />
             <span>
-              Terdapat <strong className="font-mono">{lowRatioCount}</strong> komponen PSU dengan realisasi aktual di bawah <strong>95%</strong> dari luasan/volume siteplan.
+              Terdapat <strong className="font-mono">{lowRatioCount}</strong> komponen PSU dengan realisasi aktual di bawah <strong>{minPhysicalRatioPct}%</strong> dari luasan/volume siteplan.
             </span>
           </div>
         )}
@@ -388,7 +410,7 @@ export const SurveiFisikView: React.FC<SurveiFisikViewProps> = ({
             <tbody className="divide-y divide-slate-200 text-xs">
               {filteredItems.map((item) => {
                 const ratio = getMeasurementRatio(item.siteplanVolume, item.actualVolume);
-                const isLow = item.actualVolume > 0 && ratio < 95;
+                const isLow = item.actualVolume > 0 && ratio < minPhysicalRatioPct;
                 return (
                   <tr key={item.id} className="hover:bg-slate-50/70">
                     <td className="py-3 px-4 font-medium text-slate-600 whitespace-nowrap">
@@ -442,7 +464,7 @@ export const SurveiFisikView: React.FC<SurveiFisikViewProps> = ({
                       ) : isLow ? (
                         <span className="inline-flex items-center gap-1 text-[#DC2626] font-semibold">
                           <AlertTriangle className="w-3.5 h-3.5" />
-                          Kurang (&lt;95%)
+                          Kurang (&lt;{minPhysicalRatioPct}%)
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 text-[#059669] font-medium">

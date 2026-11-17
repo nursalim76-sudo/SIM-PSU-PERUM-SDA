@@ -267,7 +267,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <div
               className="grid gap-2 items-end h-52 border-b border-slate-200 px-2 pb-2"
               style={{
-                gridTemplateColumns: `repeat(${displayedChartData.length}, minmax(0, 1fr))`,
+                gridTemplateColumns: `repeat(${Math.max(1, displayedChartData.length)}, minmax(0, 1fr))`,
               }}
             >
               {displayedChartData.map((row) => {
@@ -304,7 +304,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <div
               className="grid gap-2 px-2 pt-2"
               style={{
-                gridTemplateColumns: `repeat(${displayedChartData.length}, minmax(0, 1fr))`,
+                gridTemplateColumns: `repeat(${Math.max(1, displayedChartData.length)}, minmax(0, 1fr))`,
               }}
             >
               {displayedChartData.map((row) => (
